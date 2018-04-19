@@ -111,7 +111,7 @@ class DashboardController extends Controller
         } elseif ($user->projects()->count() > 1) {
             return redirect()->action('Resources\ProjectController@index');
         } else {
-            return redirect()->action('Resources\ProjectController@create');
+            return redirect()->action('Resources\InspirationController@index');
         }
     }
 
