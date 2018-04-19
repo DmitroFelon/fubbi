@@ -44,7 +44,7 @@ class TeamController extends Controller
             case 'client':
                 $teams = $user->teams()->with('users')->get();
                 if ($teams->isEmpty()) {
-                    return redirect()->action('Resources\ProjectController@create');
+                    return redirect()->action('Resources\InspirationController@index');
                 }
                 break;
             default:

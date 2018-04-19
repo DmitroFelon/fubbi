@@ -270,6 +270,17 @@ class Project extends Model implements HasMediaConversions, Invitable
 
     /**
      * Implementation of App\Models\Interfaces\Invitable interface
+     * Used to export project's url in notification
+     *
+     * @return string
+     */
+    public function getExportUrl()
+    {
+        return url()->action('Resources\ProjectController@export', $this);
+    }
+
+    /**
+     * Implementation of App\Models\Interfaces\Invitable interface
      * Used to invite someone to join this project
      *
      * @return string

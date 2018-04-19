@@ -112,7 +112,7 @@ class ProjectController extends Controller
             case \App\Models\Role::CLIENT:
                 $projects = $user->projects()->paginate(10);
                 if ($projects->isEmpty()) {
-                    return redirect()->action('Resources\ProjectController@create');
+                    return redirect()->action('Resources\InspirationController@index');
                 }
                 break;
             default:

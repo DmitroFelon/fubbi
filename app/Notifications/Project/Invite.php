@@ -52,7 +52,10 @@ class Invite extends Notification
             ->line('Thank you for using our application!');
 
         if (method_exists($this->invitation->invitable, 'export')) {
-            $email->line('<a href="' . Storage::url('exports/' . $this->invitation->invitable->export() . '">Project Export</a>'));
+            $this->invitation->invitable->export();
+
+            $export_url = $this->invitation->invitable->getExportUrl();
+            $email->line("Project Export: {$export_url}");
         }
 
         return $email;

@@ -89,6 +89,7 @@ class DashboardController extends Controller
             case \App\Models\Role::WRITER:
             case \App\Models\Role::DESIGNER:
             case \App\Models\Role::RESEARCHER:
+            case \App\Models\Role::EDITOR:
                 return $this->workers();
                 break;
             case \App\Models\Role::ADMIN:
@@ -111,7 +112,7 @@ class DashboardController extends Controller
         } elseif ($user->projects()->count() > 1) {
             return redirect()->action('Resources\ProjectController@index');
         } else {
-            return redirect()->action('Resources\ProjectController@create');
+            return redirect()->action('Resources\InspirationController@index');
         }
     }
 
