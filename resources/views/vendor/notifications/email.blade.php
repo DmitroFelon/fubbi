@@ -12,7 +12,7 @@
 
 {{-- Intro Lines --}}
 @foreach ($introLines as $line)
-    {{ $line }}
+    {!! $line !!}
 
 @endforeach
 
@@ -37,7 +37,7 @@ switch ($level) {
 
 {{-- Outro Lines --}}
 @foreach ($outroLines as $line)
-    {{ $line }}
+    {!! $line !!}
 
 @endforeach
 
@@ -45,7 +45,8 @@ switch ($level) {
 @if (! empty($salutation))
     {{ $salutation }}
 @else
-    Regards,<br>{{ config('app.name') }}
+    Regards,
+    {{ config('app.name') }}
 @endif
 
 {{-- Subcopy --}}
