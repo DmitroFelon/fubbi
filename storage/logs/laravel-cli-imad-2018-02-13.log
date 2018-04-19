@@ -1,0 +1,1 @@
+[2018-02-13 13:58:00] local.ERROR: Class name must be a valid object or a string {"exception":"[object] (Symfony\\Component\\Debug\\Exception\\FatalThrowableError(code: 0): Class name must be a valid object or a string at /home/imad/php projects/fubbi/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Concerns/HasRelationships.php:506)"} []

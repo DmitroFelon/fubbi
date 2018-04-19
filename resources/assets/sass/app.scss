@@ -1,0 +1,203 @@
+/*
+ *
+ *   INSPINIA - Responsive Admin Theme
+ *   version 2.7.1
+ *
+*/
+// Fonts
+@import url("https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&lang=en");
+// Variables, Mixins
+@import "import/variables";
+@import "import/mixins";
+// INSPINIA Theme Elements
+@import "import/typography";
+@import "import/navigation";
+@import "import/top_navigation";
+@import "import/buttons";
+@import "import/badges_labels";
+@import "import/elements";
+@import "import/sidebar";
+@import "import/base";
+@import "import/pages";
+@import "import/chat";
+@import "import/metismenu";
+@import "import/spinners";
+// Landing page styles
+@import "import/landing";
+// RTL Support
+@import "import/rtl";
+// For demo only - config box style
+@import "import/theme-config";
+// INSPINIA Skins
+@import "import/skins";
+@import "import/md-skin";
+// Media query style
+@import "import/media";
+// Custom style
+// Your custom style to override base style
+@import "import/custom";
+//Theme styles
+@import "inspinia.css";
+@import "animate.css";
+//Fubbi styles
+@import "style.css";
+
+// Clear layout on print mode
+@media print {
+  nav.navbar-static-side {
+    display: none;
+  }
+  body {
+    overflow: visible !important;
+  }
+
+  #page-wrapper {
+    margin: 0;
+  }
+}
+
+.message-switcher {
+  cursor: pointer;
+}
+
+.role-placeholder {
+  border-radius: 50%;
+  padding: 0.4vw;
+  color: white;
+  text-align: center;
+  font: 2vw Arial, sans-serif;
+  width: 3vw;
+  height: 3vw;
+}
+
+.sk-spinner-big {
+  width: 30px !important;
+  height: 100px !important;
+}
+
+.spinner-big {
+  padding-top: 130px;
+}
+
+.chat-message.right > div > div > .message {
+  margin-left: 100px;
+}
+
+.chat-message.left > div > div > .message {
+  margin-right: 100px;
+}
+
+.chat-nav-link {
+  width: 100%;
+}
+
+#help-video-wrapper {
+  position: fixed;
+  bottom: 15px;
+  right: 15px;
+  display: none;
+}
+
+.help-video-alert {
+  width: 70%;
+}
+
+.help-video {
+  height: 35vw;
+  width: 100%;
+}
+
+a:hover {
+  cursor: pointer !important;
+}
+
+.keyword-question > ul > li {
+  list-style: none;
+}
+
+li > .keyword-question-tab, .keyword-question-tab:hover {
+  display: block;
+  width: auto;
+  margin: 0 0.5em 0.5em 0 !important;
+  padding: 8px !important;
+  text-decoration: none;
+  background: #6fd1bd !important;
+  color: #fff !important;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px !important;
+  list-style: none;
+}
+
+li.active > .keyword-question-tab {
+  background: #1AB394 !important;
+  color: #fff !important;
+}
+
+.keyword-question-tab:hover {
+  background: #1AB394 !important;
+  margin: 0 0.5em 0.5em 0 !important;
+  border-radius: 5px !important;
+  padding: 8px !important;
+}
+
+.collapse-link {
+  color: #c4c4c4 !important;
+}
+
+.pointer:hover {
+  cursor: pointer;
+}
+
+.clickable-row {
+  display: block;
+}
+
+.clickable-row:hover {
+  background-color: #f6fbfd;
+  cursor: pointer;
+}
+
+td.project-actions .btn {
+  width: 80px;
+}
+
+#page-wrapper {
+  overflow: hidden;
+}
+
+.writting-style-list strong {
+  width: 10em;
+  display: inline-block;
+}
+
+a.participant-name {
+  width: 75%;
+  display: inline-block;
+  line-break: strict;
+  margin-right: 10%;
+}
+
+.user-datails {
+  font-size: 1.1em !important;
+}
+
+.user-datails strong {
+  width: 15em;
+  display: inline-block;
+}
+
+.autoheight {
+  overflow: hidden;
+  display: block;
+}
+
+input[data-focus="true"] {
+  border-color: #1ab394;
+  box-shadow: 0 0 1em 0 #1ab394;
+}
+
+.conversations-list{
+  height: 30em;
+  overflow-y: auto;
+}

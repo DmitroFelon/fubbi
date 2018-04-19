@@ -1,0 +1,233 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: FubbiMultilanguageLaravelApplication\n"
+"POT-Creation-Date: 2017-12-16 11:24+0000\n"
+"PO-Revision-Date: 2017-12-16 11:24+0000\n"
+"Last-Translator: Imad Bazzal <imad.bazzal.93@gmail.com>\n"
+"Language-Team: Imad Bazzal <imad.bazzal.93@gmail.com>\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.4\n"
+"X-Poedit-KeywordsList: _;__;gettext;_n:1,2;ngettext:1,2;dgettext:2\n"
+"X-Poedit-Basepath: ../../../../../app\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-SearchPath-0: Http\n"
+"X-Poedit-SearchPath-1: ../resources/views\n"
+"X-Poedit-SearchPath-2: Console\n"
+"X-Poedit-SearchPath-3: ../storage/framework/messages/\n"
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:5
+msgid "Type content themes here"
+msgstr "Type content themes here"
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:5
+msgid "Type at least 10 themes. Separate by coma or click 'enter'."
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:10
+msgid "Please list top 5 content themes in order of priority."
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:24
+msgid "What are the top 3 questions clients desperately want answers to?"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:24
+msgid "Separate by coma or click 'enter'"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:26
+msgid ""
+"Is it essential that the content we create for you be relevant to a specific "
+"country, state or city? Please explain"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:31
+msgid "Age"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:35
+msgid "Sex"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:39
+msgid "Income"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:43
+msgid "Education"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:47
+msgid "Profession"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:51
+msgid "What is the home page url of the website we are creating content for?"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:53
+msgid "What language do you want us to write content in?"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:55
+msgid ""
+"Here are our three writing styles. Please review each one of them and then "
+"select\n"
+"            one."
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:59
+msgid "Fact based"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:61
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:66
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:72
+msgid "Click Here"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:64
+msgid "Emotional"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:69
+msgid "Middle Road"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:76
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:78
+msgid "Please select from the drop-down menu the style you prefer"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:86
+msgid ""
+"For some of our packages we publish on Quora. Do you have a Quora account? "
+"(it’s a secure field)"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:93
+msgid "Username"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:97
+msgid "Password"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:112
+msgid "Do you have an SEO Company?"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:119
+msgid "SEO Contact Name"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:119
+msgid "First Name"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:123
+msgid "Last Name"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:127
+msgid "SEO Contact Email"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:136
+msgid ""
+"Please copy the URL of one article the exhibits a writing style that would "
+"like for your content"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:138
+msgid "Do you have branding guidelines?"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:140
+msgid "Do you have a high resolution logo that we can use?"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:142
+msgid "Do you want us to add images to your articles?"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:142
+msgid ""
+"Not all clients do as it’s somewhat subjective. If yes, please help us "
+"prepare the perfect images for your content. If you have photos you want to "
+"upload, you can do that too. Please understand that images can be “very” "
+"expensive but we’ll do the best we can for you. Please upload at least 5 "
+"image samples."
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:144
+msgid ""
+"You can do that by sharing examples to 5 articles with images that you like "
+"– just type in the URL."
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:144
+msgid "Separate by coma or click \"enter\"."
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:146
+msgid ""
+"Do you have keywords that you want us to avoid or content that you would not "
+"want us to use? Separate by coma or click \"enter\"."
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:148
+msgid ""
+"You can also send us URLs of web pages that have the kind of images you "
+"like. Just type the urls below."
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:150
+msgid ""
+"We use Google docs to have you approve your articles. Please add all the "
+"email addresses of people in your organisation that need access."
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:152
+msgid ""
+"Do you want us to add calls to action (CTA) to the end of your articles?"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:152
+msgid ""
+"Examples include phoning your office for a complimentary consultation or "
+"review. Other times it might be to option in to receive a free report. If "
+"you want us to close your articles with a CTA please provide us with "
+"specific information i.e. if you want them to download a free report, please "
+"share a link to the download offer. If you want people to phone your office "
+"please provide details of what you’ll share on the phone call. We will, in "
+"turn create a one paragraph call to action for your articles"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:154
+msgid ""
+"Do you already have content you've produced that you wish to see in future "
+"articles? If so, please upload transcripts."
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:154
+msgid ""
+"Note: You do not have to upload all your content now. Just enough to get us "
+"started with producing your articles and social posts. You can send us more "
+"at a later date. Please upload up to 10 transcripts"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:156
+msgid "Do you want to review outlines before we send you articles to approve?"
+msgstr ""
+
+#: ../storage/framework/messages/a7bf1c4fc6a5fa9ca95f060a2a80347dd7931731.php.php:156
+msgid ""
+"Note: Most clients say 'no'. You however should say 'yes' if 1. you've "
+"worked with writers before and you've never been happy, or... 2. If you know "
+"you're very selective , or... 3. Your audience has 'very' acute knowledge "
+"about a subject that is highly specialised"
+msgstr ""

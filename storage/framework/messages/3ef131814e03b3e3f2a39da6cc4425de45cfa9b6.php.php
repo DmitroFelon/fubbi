@@ -1,0 +1,1 @@
+<span class="text-muted"><?php echo e(__('empty')); ?></span>

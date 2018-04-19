@@ -1,0 +1,1 @@
+<span class="text-muted">{{_i('empty')}}</span>
