@@ -89,6 +89,7 @@ class DashboardController extends Controller
             case \App\Models\Role::WRITER:
             case \App\Models\Role::DESIGNER:
             case \App\Models\Role::RESEARCHER:
+            case \App\Models\Role::EDITOR:
                 return $this->workers();
                 break;
             case \App\Models\Role::ADMIN:
