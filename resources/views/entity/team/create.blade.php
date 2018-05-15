@@ -15,6 +15,12 @@
 
                 <div class="col-xs-4 col-sm-4 col-md-4 col-lg-6">
                     {!! Form::bsText( 'name', null, _i('Name of the new team'), null, ['required' ] ) !!}
+                    @if ($errors->has('name'))
+                        <span class="help-block">
+                            <strong>{{ $errors->first('name') }}</strong>
+                        </span>
+                    @endif
+
                 </div>
 
                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-10">
@@ -54,5 +60,3 @@
         </div>
     </div>
 @endsection
-
-

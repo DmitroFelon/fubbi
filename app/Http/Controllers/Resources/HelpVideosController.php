@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Helpers\Page;
 use App\Models\HelpVideo;
 use Illuminate\Http\Request;
+use App\Http\Requests\CreateOrUpdateHelpVideoRequest;
 
 class HelpVideosController extends Controller
 {
@@ -37,7 +38,7 @@ class HelpVideosController extends Controller
      * @param HelpVideo $helpVideo
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, HelpVideo $helpVideo)
+    public function store(CreateOrUpdateHelpVideoRequest $request, HelpVideo $helpVideo)
     {
         $helpVideo->fill($request->except(['_token', '_method']));
         $helpVideo->save();
@@ -75,7 +76,7 @@ class HelpVideosController extends Controller
      * @param HelpVideo $helpVideo
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, HelpVideo $helpVideo)
+    public function update(CreateOrUpdateHelpVideoRequest $request, HelpVideo $helpVideo)
     {
         $helpVideo->fill($request->except(['_token', '_method']));
         $helpVideo->save();

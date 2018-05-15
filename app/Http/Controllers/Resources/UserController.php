@@ -9,6 +9,7 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use App\Http\Requests\UpdateUserSettingsRequest;
 
 /**
  * Class UserController
@@ -139,7 +140,7 @@ class UserController extends Controller
      * @param User $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, User $user)
+    public function update(UpdateUserSettingsRequest $request, User $user)
     {
         $request->validate([
             'phone'    => 'required',

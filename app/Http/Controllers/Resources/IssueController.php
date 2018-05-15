@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Issue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\CreateIssueReportRequest;
 
 class IssueController extends Controller
 {
@@ -38,7 +39,7 @@ class IssueController extends Controller
      * @param Issue $issue
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, Issue $issue)
+    public function store(CreateIssueReportRequest $request, Issue $issue)
     {
         $issue->fill($request->all());
 

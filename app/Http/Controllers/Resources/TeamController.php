@@ -7,6 +7,7 @@ use App\Models\Team;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\CreateOrUpdateTeamRequest;
 
 /**
  * Class TeamController
@@ -75,7 +76,7 @@ class TeamController extends Controller
      * @param Team $team
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, Team $team)
+    public function store(CreateOrUpdateTeamRequest $request, Team $team)
     {
         $team->fill($request->except(['_token']));
         $team->save();
@@ -125,7 +126,7 @@ class TeamController extends Controller
      * @param  \App\Models\Team $team
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Team $team)
+    public function update(CreateOrUpdateTeamRequest $request, Team $team)
     {
         $team->fill(
             $request->except(['_method', '_token'])
