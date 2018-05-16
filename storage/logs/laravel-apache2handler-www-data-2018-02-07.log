@@ -1,1 +1,0 @@
-[2018-02-07 07:34:09] local.ERROR: Trying to get property of non-object {"exception":"[object] (ErrorException(code: 0): Trying to get property of non-object at /home/imad/php projects/fubbi/app/Http/Controllers/DashboardController.php:54)"} []

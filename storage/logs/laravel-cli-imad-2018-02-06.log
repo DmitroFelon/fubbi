@@ -1,3 +1,0 @@
-[2018-02-06 06:31:22] local.ERROR: Unable to prepare route [test] for serialization. Uses Closure. {"exception":"[object] (LogicException(code: 0): Unable to prepare route [test] for serialization. Uses Closure. at /home/imad/php projects/fubbi/vendor/laravel/framework/src/Illuminate/Routing/Route.php:880)"} []
-[2018-02-06 12:43:36] local.DEBUG: {"imad.bazzal.93@gmail.com":"writer","client@example.com":"commenter","writer@example.com":"writer"} [] []
-[2018-02-06 12:48:33] local.DEBUG: {"imad.bazzal.93@gmail.com":"writer","client@example.com":"commenter","writer@example.com":"writer"} [] []
