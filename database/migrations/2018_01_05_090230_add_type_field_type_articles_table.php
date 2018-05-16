@@ -47,6 +47,7 @@ class AddTypeFieldTypeArticlesTable extends Migration
      */
     public function down()
     {
+        Schema::dropIfExists('article_meta');
         Schema::dropIfExists('articles');
     }
 }

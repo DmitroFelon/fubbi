@@ -83,11 +83,9 @@ class TeamController extends Controller
 
 
         if ($request->has('users')) {
-            $users = User::whereIn('id', $request->input('users'));
+            $ids   = array_keys($request->input('users'));
+            $users = User::whereIn('id', $ids)->get();
             $users->each(function (User $user) use ($team) {
-                if ($user->id == Auth::user()->id) {
-                    return;
-                }
                 $user->inviteTo($team);
             });
         }
@@ -153,7 +151,8 @@ class TeamController extends Controller
      */
     public function destroy(Team $team)
     {
-        //
+        $team->delete();
+        return redirect(action('Resources\IssueController@index'))->with('success', _i('Team removed'));
     }
 
     /**

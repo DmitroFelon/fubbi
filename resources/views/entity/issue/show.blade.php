@@ -17,6 +17,12 @@
                 {!! Form::submit(_i('Mark as fixed'), ['class' => 'btn btn-success text-white btn-xs']) !!}
 
                 {!! Form::close() !!}
+                <br>
+                {!! Form::model( $issue, ['route' => ['issues.destroy', $issue], 'method' => 'DELETE'] ) !!}
+
+                {!! Form::submit(_i('Delete'), ['class' => 'btn btn-danger text-white btn-xs']) !!}
+
+                {!! Form::close() !!}
 
                 @endrole
             </div>

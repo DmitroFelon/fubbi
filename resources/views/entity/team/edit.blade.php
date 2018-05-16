@@ -20,7 +20,7 @@
                             <strong>{{ $errors->first('name') }}</strong>
                         </span>
                     @endif
-                    
+
                 </div>
 
                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-10">
@@ -57,6 +57,12 @@
 
                 {{Form::close()}}
             </div>
+            {!! Form::model( $team, ['route' => ['teams.destroy', $team], 'method' => 'DELETE'] ) !!}
+
+            {!! Form::submit(_i('Delete'), ['class' => 'm-t-md btn btn-danger']) !!}
+
+            {!! Form::close() !!}
+
         </div>
     </div>
 

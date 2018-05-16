@@ -43,11 +43,14 @@
                                             </a>
                                         </td>
                                         <td>
-                                            <a href="{{action('Resources\HelpVideosController@destroy', $video)}}"
-                                               class="btn btn-white btn-sm red-bg">
-                                                <i class="fa fa-pencil"></i> {{_i('Delete')}}
-                                            </a>
-                                        </td>
+                                            <form class="" action="{{action('Resources\HelpVideosController@destroy', $video)}}" method="post">
+                                                 {{ csrf_field() }}
+                                                 <input type="hidden" name="_method" value="DELETE">
+                                                 <button type="submit" class="btn btn-white btn-sm red-bg" name="button">
+                                                     <i class="fa fa-pencil"></i> {{_i('Delete')}}
+                                                 </button>
+                                             </form>
+                                          </td>
                                     </tr>
                                 @endforeach
                                 </tbody>
