@@ -152,7 +152,7 @@ class TeamController extends Controller
     public function destroy(Team $team)
     {
         $team->delete();
-        return redirect(action('Resources\IssueController@index'))->with('success', _i('Team removed'));
+        return redirect(action('Resources\TeamController@index'))->with('success', _i('Team removed'));
     }
 
     /**
