@@ -89,7 +89,7 @@ class User extends Authenticatable implements HasMedia
 {
     use Notifiable;
     use Billable;
-    use EntrustUserTrait;
+    use EntrustUserTrait { restore as private restoreA; }
     use HasMediaTrait;
     use Searchable;
     use Metable;
@@ -152,6 +152,10 @@ class User extends Authenticatable implements HasMedia
      */
     protected $appends = ['role'];
 
+    public function restore()
+    {
+        $this->restoreA();
+    }
     /**
      * @return array
      */
