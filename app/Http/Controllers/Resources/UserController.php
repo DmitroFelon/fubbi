@@ -150,7 +150,8 @@ class UserController extends Controller
         if ($request->input('password')) {
             $user->password = bcrypt($request->input('password'));
         }
-
+        $user->first_name          = $request->input('first_name');
+        $user->last_name           = $request->input('last_name');
         $user->phone               = $request->input('phone');
         $user->address_line_1      = $request->input('address_line_1');
         $user->address_line_2      = $request->input('address_line_2');
