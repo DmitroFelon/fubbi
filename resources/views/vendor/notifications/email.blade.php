@@ -46,7 +46,7 @@ switch ($level) {
     {{ $salutation }}
 @else
     Regards,
-    {{ config('app.name') }}
+    {{ config('app.name') }} Team
 @endif
 
 {{-- Subcopy --}}

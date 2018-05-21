@@ -81,3 +81,22 @@
 {{Form::submit(_i('Save'), ['class' => 'btn btn-primary'])}}
 
 {{Form::close()}}
+
+{{Form::model(\Illuminate\Support\Facades\Auth::user(), ['id' => 'settings-email-form', 'method' => 'Post', 'route' => ['sendEmail', \Illuminate\Support\Facades\Auth::user()]   ]) }}
+
+<h3 class="text-center">{{_i('Change Email')}}</h3>
+
+<div class="row">
+    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+        {!! Form::bsText('new_email', null, _i('New email'), null, ['data-focus' =>  (\Illuminate\Support\Facades\Session::has('change_password')) ? 'true' : 'false'], 'email') !!}
+    </div>
+
+    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+        {!! Form::bsText('password', null, _i('Password'), null, ['data-focus' =>  null, 'id' => 'current_password'], 'password') !!}
+    </div>
+
+</div>
+
+{{Form::submit(_i('Save'), ['class' => 'btn btn-primary'])}}
+
+{{Form::close()}}
