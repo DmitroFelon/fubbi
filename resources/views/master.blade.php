@@ -15,6 +15,8 @@
 
 <body>
 
+@yield('message')
+
 <!-- Wrapper-->
 <div id="wrapper">
     <!-- Navigation -->

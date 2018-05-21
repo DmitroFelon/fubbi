@@ -1,7 +1,19 @@
 @extends('master')
 
-@section('content')
+@section('message')
 
+<div id="sure" hidden>
+    <div id="message" >
+        <p class="text-center warning">Are you sure that you want to block or to restore this user?</p>
+        <button class="btn btn-primary col-md-6" type="button" name="block_user">Yes</button>
+        <button class="btn btn-danger col-md-6" type="button" name="close_message">No</button>
+    </div>
+</div>
+
+@endsection
+
+@section('content')
+<div id="wrapper">
     <div class="ibox">
         <div class="ibox-title">
             <h5>{{_i('Users')}}</h5>
@@ -63,9 +75,9 @@
                         <td>{{$user->phone}}</td>
                         <td>{{@$user->roles()->first()->display_name}}</td>
                         <td>
-                            {!! Form::open([ 'method'  => 'delete', 'route' => [ 'users.destroy', $user ] ]) !!}
+                            {!! Form::open([ 'method'  => 'delete', 'route' => [ 'users.destroy', $user ], 'id' => $user->id, 'name' => 'block_user' ]) !!}
                             {!! Form::submit( ($user->trashed()) ? 'Restore' : 'Block',
-                            ['class' => ($user->trashed()) ? 'btn btn-success btn-xs' : 'btn btn-danger btn-xs'] ) !!}
+                            ['class' => ($user->trashed()) ? 'btn btn-success btn-xs' : 'btn btn-danger btn-xs', 'name' => 'block'] ) !!}
                             {!! Form::close() !!}
                         </td>
                     </tr>
@@ -98,6 +110,41 @@
     <style>
         .input-group-btn .dropdown-toggle {
             display: none;
+        }
+        #sure {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: 900;
+        }
+        .blur {
+            filter: blur(2px);
+            -webkit-filter: blur(2px);
+            -moz-filter: blur(2px);
+            -o-filter: blur(2px);
+            -ms-filter: blur(2px);
+        }
+        #message {
+            border: 1px solid rgba(1,1,1,0.3);
+            position: absolute;
+            top: 30%;
+            left: 33%;
+            z-index: 1000;
+            width: 35%;
+            height: 80px;
+            background-color: rgb(247,247,247);
+            border-radius: 10px;
+            -moz-border-radius:10px;
+            -webkit-border-radius:10px;
+        }
+        #message p {
+            padding-top: 10px;
+        }
+        #message button {
+            margin-top: 7px;
+            border-radius: 10px;
+            -moz-border-radius:10px;
+            -webkit-border-radius:10px;
         }
     </style>
     <script>
@@ -134,6 +181,19 @@
                     table.addFilter('role', value, ['role']);
                 }
                 table.filter();
+            });
+            $('input[name="block"]').click(function(e) {
+                e.preventDefault();
+                $('#wrapper').addClass('blur');
+                $('#sure').children('div').children('button[name="block_user"]').val($(this).parent().attr('id'));
+                $('#sure').show();
+            });
+            $('button[name="block_user"]').click(function() {
+                $('form[id="' + $(this).val() + '"]').submit();
+            });
+            $('button[name="close_message"]').click(function() {
+                $('#wrapper').removeClass('blur');
+                $('#sure').hide();
             });
         });
     </script>
