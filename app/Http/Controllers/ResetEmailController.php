@@ -7,6 +7,7 @@ use App\Http\Requests\ResetEmailRequest;
 use App\User;
 use Illuminate\Support\Facades\Hash;
 use App\Notifications\ChangeEmail;
+use Illuminate\Support\Facades\DB;
 
 class ResetEmailController extends Controller
 {
@@ -14,7 +15,11 @@ class ResetEmailController extends Controller
     {
         if (Hash::check($request->input('password'), $request->user()->password))
         {
-            $token = $request->user()->changeEmailRequestData($request->input('email'));
+            try {
+                $token = $request->user()->changeEmailRequestData($request->input('email'));
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', 'Such email has been already requested!');
+            }
             $request->user()->notify(new ChangeEmail($token));
             return redirect()->back()->with('success', 'We have e-mailed your email reset link!');
         }
@@ -25,7 +30,12 @@ class ResetEmailController extends Controller
     {
         $data = $request->user()->findByResetToken($token);
         if (!is_null($data)) {
-            $request->user()->resetEmail($data->email, $token);
+            try {
+                $request->user()->resetEmail($data->email, $token);
+            } catch (\Exception $e) {
+                DB::table('reset_email')->where('token', $token)->delete();
+                return redirect()->back()->with('error', 'Such email has been already taken!');
+            }
             return redirect()->route('settings')->with('success', 'Your email was successfully changed!');
         }
         return redirect()->route('settings')->with('error', 'Something went wrong!');

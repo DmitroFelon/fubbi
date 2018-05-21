@@ -82,7 +82,7 @@
 
 {{Form::close()}}
 
-{{Form::open( ['id' => 'settings-email-form', 'method' => 'Post', 'route' => ['sendEmail', \Illuminate\Support\Facades\Auth::user()] ]) }}
+{{Form::open( ['id' => 'settings-email-form', 'method' => 'Post', 'route' => ['sendEmail'] ]) }}
 
 <h3 class="text-center">{{_i('Change Email')}}</h3>
 
