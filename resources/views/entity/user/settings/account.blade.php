@@ -88,7 +88,7 @@
 
 <div class="row">
     <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-        {!! Form::bsText('new_email', null, _i('New email'), null, ['data-focus' =>  (\Illuminate\Support\Facades\Session::has('change_password')) ? 'true' : 'false'], 'email') !!}
+        {!! Form::bsText('email', null, _i('New email'), null, ['data-focus' =>  (\Illuminate\Support\Facades\Session::has('change_password')) ? 'true' : 'false'], 'email') !!}
     </div>
 
     <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">

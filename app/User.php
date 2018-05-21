@@ -28,6 +28,10 @@ use Musonza\Chat\Notifications\MessageSent;
 use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
 use Spatie\MediaLibrary\HasMedia\Interfaces\HasMedia;
 use Zizaco\Entrust\Traits\EntrustUserTrait;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+
 
 /**
  * App\User
@@ -151,6 +155,28 @@ class User extends Authenticatable implements HasMedia
      * @var array
      */
     protected $appends = ['role'];
+
+    public function changeEmailRequestData($email)
+    {
+        $token = Str::random(60);
+        DB::table('reset_email')->insert([
+            'email' => $email,
+            'token' => $token,
+            'created_at' => Carbon::now()
+        ]);
+        return $token;
+    }
+
+    public function findByResetToken($token)
+    {
+        return DB::table('reset_email')->select('email')->where('token', $token)->first();
+    }
+
+    public function resetEmail($email, $token)
+    {
+        User::where('email', '=', $this->email)->update(['email' => $email]);
+        DB::table('reset_email')->where('token', $token)->delete();
+    }
 
     public function restore()
     {
