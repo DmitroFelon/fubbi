@@ -67,12 +67,18 @@ class SettingsController extends Controller
 
         if ($request->input('stripeToken')) {
             try {
-                $user->updateCard($request->input('stripeToken'));
-
-                return redirect()->back()->with(
-                    'success', _i('Card has been updated Successfully')
-                );
-
+                if (is_null($user->stripe_id)) {
+                    $user->createAsStripeCustomer($request->input('stripeToken'));
+                    return redirect()->back()->with(
+                        'success', _i('Card has been created Successfully')
+                    );
+                }
+                else {
+                    $user->updateCard($request->input('stripeToken'));
+                    return redirect()->back()->with(
+                        'success', _i('Card has been updated Successfully')
+                    );
+                }
             } catch (\Stripe\Error\Card $e) {
                 $body  = $e->getJsonBody();
                 $error = $body['error'];
