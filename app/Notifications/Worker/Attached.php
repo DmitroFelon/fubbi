@@ -19,15 +19,18 @@ class Attached extends Notification
      * @var Project
      */
     protected $project;
+    protected $role;
+
 
     /**
      * Create a new notification instance.
      *
      * @param Project $project
      */
-    public function __construct(Project $project)
+    public function __construct(Project $project, $role)
     {
         $this->project = $project;
+        $this->role = $role;
     }
 
     /**
@@ -49,11 +52,29 @@ class Attached extends Notification
      */
     public function toMail($notifiable)
     {
+        if ($this->role == 'account_manager') {
+            return $this->toMailForAccountManager($notifiable);
+        }
+        else {
+            return $this->toMailForWorker($notifiable);
+        }
+    }
+
+    public function toMailForAccountManager($notifiable)
+    {
         return (new MailMessage)
             ->subject('Add to project!')
             ->line(_i('Hello %s', [$notifiable->first_name]))
-            ->line(_i('You have been added to project.'))
+            ->line(_i('You have been added to project "%s"', [$this->project->name]))
             ->action('Review Project', action('Resources\ProjectController@show', $this->project));
     }
 
+    public function toMailForWorker($notifiable)
+    {
+        return (new MailMessage)
+            ->subject('Task assigned!')
+            ->line(_i('Hello %s', [$notifiable->first_name]))
+            ->line(_i('You have been assigned a task for "%s"', [$this->project->name]))
+            ->action('Review Project', action('Resources\ProjectController@show', $this->project));
+    }
 }

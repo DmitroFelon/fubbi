@@ -228,7 +228,7 @@ class ProjectObserver
             ->log('Users:  ' . $attached_users_names . ' have beed attached to project ' . $project->name);
 
         $workers->each(function (User $user) use ($project) {
-            $user->notify(new Attached($project));
+            $user->notify(new Attached($project, $user->role));
         });
 
     }

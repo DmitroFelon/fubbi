@@ -45,8 +45,8 @@ switch ($level) {
 @if (! empty($salutation))
     {{ $salutation }}
 @else
-    Regards,
-    {{ config('app.name') }} Team
+    Thank you!
+    The Fubbi Team
 @endif
 
 {{-- Subcopy --}}

@@ -44,9 +44,9 @@ class Detached extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->subject('You have been attached to project!')
+            ->subject('You have been detached from project!')
             ->line(_i('Hello %s', [$notifiable->name]))
-            ->line(_i('You have beed detached from project: %s.', [$this->project->name]))
+            ->line(_i('You have beed detached from project: "%s".', [$this->project->name]))
             ->line('Thank you for using our application!');
     }
 
