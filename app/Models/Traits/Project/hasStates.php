@@ -46,17 +46,25 @@ trait hasStates
      */
     public function filling(Request $request)
     {
-        switch ($request->input('_step')) {
-            case ProjectStates::QUIZ_FILLING:
-                $this->fillQuiz($request);
-                break;
-            case ProjectStates::KEYWORDS_FILLING:
-                $this->fillKeywords($request);
-                break;
-            default:
-                abort(404);
-                break;
-        }
+        $this->setMeta(
+            $request->except(
+                [
+                    '_token',
+                    '_project_id',
+                    '_step',
+                    '_method',
+                    'compliance_guideline',
+                    'logo',
+                    'article_images',
+                    'ready_content',
+                    'themes',
+                    'themes_order',
+                    'questions'
+                ]
+            )
+        );
+        $this->addFiles($request);
+        $this->setState(\App\Models\Helpers\ProjectStates::MANAGER_REVIEW);
 
         $this->save();
 
@@ -86,7 +94,7 @@ trait hasStates
             )
         );
         $this->addFiles($request);
-        $this->setState(\App\Models\Helpers\ProjectStates::KEYWORDS_FILLING);
+        $this->setState(\App\Models\Helpers\ProjectStates::MANAGER_REVIEW);
     }
 
     /**
@@ -124,11 +132,6 @@ trait hasStates
     /**
      * @param \Illuminate\Http\Request $request
      */
-    public function fillKeywords(Request $request)
-    {
-        $this->setState(ProjectStates::MANAGER_REVIEW);
-        $this->filled();
-    }
 
     /**
      * Fires model event "filled"
@@ -153,9 +156,6 @@ trait hasStates
                 return $this->prefillQuiz($request);
             }
 
-            if ($request->input('_step') == ProjectStates::KEYWORDS_FILLING) {
-                return $this->prefillKeywords($request);
-            }
         } catch (\Exception $e) {
             throw $e;
         }

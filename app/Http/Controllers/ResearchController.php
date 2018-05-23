@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\Api\Keywords\KeywordsFactoryInterface;
-use App\Services\Api\KeywordTool;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -28,9 +26,6 @@ class ResearchController extends Controller
             ? trim($request->input('theme'))
             : null;
 
-        $source = ($request->has('source'))
-            ? trim($request->input('source'))
-            : KeywordTool::SOURCE_GOOGLE;
 
         $country = ($request->has('country'))
             ? $request->input('country')
@@ -76,7 +71,7 @@ class ResearchController extends Controller
                 }
             });
 
-        $title = KeywordTool::getSourceName($source);
+        // $title = KeywordTool::getSourceName($source);
 
         return view('entity.research.partials.result', compact('title', 'questions', 'suggestions'));
     }

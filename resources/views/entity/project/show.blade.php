@@ -40,7 +40,7 @@
             @slot('title') Quiz result @endslot
             @slot('tools')
             @can('project.update', $project)
-                @if(in_array($project->state, [\App\Models\Helpers\ProjectStates::QUIZ_FILLING, \App\Models\Helpers\ProjectStates::KEYWORDS_FILLING]))
+                @if(in_array($project->state, [\App\Models\Helpers\ProjectStates::QUIZ_FILLING]))
                     <a href="{{action('Resources\ProjectController@edit', [$project, 's' => \App\Models\Helpers\ProjectStates::QUIZ_FILLING])}}"
                        class="btn btn-primary btn-xs m-r-sm p-w-sm">
                         {{($project->state == \App\Models\Helpers\ProjectStates::QUIZ_FILLING) ? 'Complete' : 'Edit'}}
@@ -60,14 +60,6 @@
             @component('components.ibox')
             @slot('title') Ideas @endslot
             @slot('tools')
-            @can('project.update', $project)
-                @if(in_array($project->state, [\App\Models\Helpers\ProjectStates::KEYWORDS_FILLING]))
-                    <a href="{{action('Resources\ProjectController@edit', [$project, 's' => \App\Models\Helpers\ProjectStates::KEYWORDS_FILLING])}}"
-                       class="btn btn-primary btn-xs m-r-sm p-w-sm">
-                        {{($project->state == \App\Models\Helpers\ProjectStates::KEYWORDS_FILLING) ? 'Complete' : 'Edit'}}
-                    </a>
-                @endif
-            @endcan
 
             <a class="collapse-link">
                 <i class="fa fa-chevron-down"></i>

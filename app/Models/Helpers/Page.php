@@ -69,7 +69,6 @@ class Page
             new self('projects.edit', [], _i('Edit Project'), [Role::CLIENT]),
             new self('projects.edit?' . ProjectStates::PLAN_SELECTION, ['s' => ProjectStates::PLAN_SELECTION], _i('Project on %s', [ProjectStates::PLAN_SELECTION]), [Role::CLIENT]),
             new self('projects.edit?' . ProjectStates::QUIZ_FILLING, ['s' => ProjectStates::QUIZ_FILLING], _i('Project on %s', [ProjectStates::QUIZ_FILLING]), [Role::CLIENT]),
-            new self('projects.edit?' . ProjectStates::KEYWORDS_FILLING, ['s' => ProjectStates::KEYWORDS_FILLING], _i('Project on %s', [ProjectStates::KEYWORDS_FILLING]), [Role::CLIENT]),
             new self('projects.edit?' . ProjectStates::MANAGER_REVIEW, ['s' => ProjectStates::MANAGER_REVIEW], _i('Project on %s', [ProjectStates::MANAGER_REVIEW]), [Role::CLIENT]),
             new self('projects.edit?' . ProjectStates::CLIENT_REVIEW, ['s' => ProjectStates::CLIENT_REVIEW], _i('Project on %s', [ProjectStates::CLIENT_REVIEW]), [Role::CLIENT]),
             new self('project.articles.index', [], _('All Articles'), [Role::CLIENT]),

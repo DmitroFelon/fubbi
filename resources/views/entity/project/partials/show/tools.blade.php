@@ -1,4 +1,4 @@
-@if(!in_array($project->state, [\App\Models\Helpers\ProjectStates::QUIZ_FILLING, \App\Models\Helpers\ProjectStates::KEYWORDS_FILLING]))
+@if(!in_array($project->state, [\App\Models\Helpers\ProjectStates::QUIZ_FILLING]))
     <a style="width:15em;" href="{{action('Resources\ProjectController@export', $project)}}"
        class="btn btn-white yellow-bg btn-xs btn-xs m-r-sm p-w-sm">
         <i class="fa fa-download"></i> {{_i('Download Requirements')}}
@@ -18,7 +18,7 @@
     @endif()
 
     @if($project->isManager(Auth::user()))
-        @if(!in_array($project->state, [\App\Models\Helpers\ProjectStates::QUIZ_FILLING, \App\Models\Helpers\ProjectStates::KEYWORDS_FILLING]))
+        @if(!in_array($project->state, [\App\Models\Helpers\ProjectStates::QUIZ_FILLING]))
             <a href="{{action('Resources\ProjectController@allow_modifications', $project)}}"
                class="btn btn-primary btn-xs btn-xs m-r-sm p-w-sm">
                 {{_i('Allow modifications')}}
@@ -30,7 +30,7 @@
 
 @role([\App\Models\Role::ADMIN, \App\Models\Role::ACCOUNT_MANAGER, \App\Models\Role::CLIENT])
 @can('project.update', $project)
-    @if(in_array($project->state, [\App\Models\Helpers\ProjectStates::QUIZ_FILLING, \App\Models\Helpers\ProjectStates::KEYWORDS_FILLING]))
+    @if(in_array($project->state, [\App\Models\Helpers\ProjectStates::QUIZ_FILLING]))
         <a href="{{action('Resources\ProjectController@edit', $project)}}"
            class="btn btn-primary btn-xs btn-xs m-r-sm p-w-sm">
             {{_i('Complete Quiz')}}
@@ -39,7 +39,7 @@
 @endcan
 @endrole
 
-@if(!in_array($project->state, [\App\Models\Helpers\ProjectStates::QUIZ_FILLING, \App\Models\Helpers\ProjectStates::KEYWORDS_FILLING]))
+@if(!in_array($project->state, [\App\Models\Helpers\ProjectStates::QUIZ_FILLING]))
     @can('articles.create', $project)
         <a href="{{action('Project\ArticlesController@create', $project)}}"
            class="btn btn-success btn-xs btn-xs m-r-sm p-w-sm">

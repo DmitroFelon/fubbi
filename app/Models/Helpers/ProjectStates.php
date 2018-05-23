@@ -30,11 +30,6 @@ abstract class ProjectStates
     /**
      * @const string
      */
-    const KEYWORDS_FILLING = 'keywords';
-
-    /**
-     * @const string
-     */
     const MANAGER_REVIEW = 'on_manager_review';
 
     /**
@@ -84,7 +79,6 @@ abstract class ProjectStates
         self::CREATED,
         self::PLAN_SELECTION,
         self::QUIZ_FILLING,
-        self::KEYWORDS_FILLING,
         self::MANAGER_REVIEW,
         self::ACCEPTED_BY_MANAGER,
         self::REJECTED_BY_MANAGER,
@@ -106,7 +100,6 @@ abstract class ProjectStates
     public static $changeable_states = [
         self::PLAN_SELECTION,
         self::QUIZ_FILLING,
-        self::KEYWORDS_FILLING,
     ];
 
     public static function getTab($state)

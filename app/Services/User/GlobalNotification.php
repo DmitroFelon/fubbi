@@ -49,7 +49,6 @@ class GlobalNotification
     {
         $filling_states = [
             ProjectStates::QUIZ_FILLING,
-            ProjectStates::KEYWORDS_FILLING,
         ];
         
         $projects = $this->user->projects()->whereIn('state', $filling_states)->get();

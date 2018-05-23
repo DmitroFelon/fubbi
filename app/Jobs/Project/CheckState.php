@@ -6,7 +6,6 @@ use App\Models\Helpers\ProjectStates;
 use App\Models\Project;
 use App\Models\Project\Service;
 use App\Models\Role;
-use App\Notifications\Client\KeywordsIncomplete;
 use App\Notifications\Client\QuizIncomplete;
 use App\Notifications\Manager\InviteOverdue;
 use App\Notifications\Project\Delayed;
@@ -74,7 +73,6 @@ class CheckState implements ShouldQueue
     {
         $filling_states = [
             ProjectStates::QUIZ_FILLING,
-            ProjectStates::KEYWORDS_FILLING
         ];
 
         if ($this->project->created_at->diffInDays(now()) > 1 and in_array($this->project->state, $filling_states)) {
@@ -136,11 +134,6 @@ class CheckState implements ShouldQueue
             );
         }
 
-        if ($this->project->created_at->diffInDays(now()) > 3 and $this->project->state == ProjectStates::KEYWORDS_FILLING) {
-            $this->project->client->notify(
-                new KeywordsIncomplete($this->project)
-            );
-        }
 
         if (!$this->project->requireWorkers() and $this->project->created_at->diffInDays(now()) > 1 and
             $this->project->created_at->diffInDays(now()) < 3

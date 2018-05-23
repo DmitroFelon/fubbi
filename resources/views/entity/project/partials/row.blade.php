@@ -28,7 +28,7 @@
         @endif
     </td>
     <td class="project-actions">
-        @if(!in_array($project->state, [\App\Models\Helpers\ProjectStates::QUIZ_FILLING, \App\Models\Helpers\ProjectStates::KEYWORDS_FILLING]))
+        @if(!in_array($project->state, [\App\Models\Helpers\ProjectStates::QUIZ_FILLING]))
             <a href="{{action('Project\ArticlesController@index', [$project])}}" class="btn btn-white btn-sm blue-bg">
                 <i class="fa fa-folder"></i> {{_i('Content')}}
             </a>

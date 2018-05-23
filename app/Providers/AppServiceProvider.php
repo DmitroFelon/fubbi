@@ -10,9 +10,6 @@ use App\Observers\InviteObserver;
 use App\Observers\MessageObserver;
 use App\Observers\ProjectObserver;
 use App\Observers\UserObserver;
-use App\Services\Api\Keywords\KeywordsFactoryInterface;
-use App\Services\Api\Keywords\LocalKeywords;
-use App\Services\Api\KeywordTool;
 use App\User;
 use Form;
 use Illuminate\Contracts\Logging\Log;
@@ -114,12 +111,10 @@ class AppServiceProvider extends ServiceProvider
                 $handler  = new RotatingFileHandler($filename);
                 $monolog->pushHandler($handler);
             });
-            $this->app->bind(KeywordsFactoryInterface::class, LocalKeywords::class);
 
         } else {
             $this->app->alias('bugsnag.logger', Log::class);
             $this->app->alias('bugsnag.logger', LoggerInterface::class);
-            $this->app->bind(KeywordsFactoryInterface::class, KeywordTool::class);
         }
 
 

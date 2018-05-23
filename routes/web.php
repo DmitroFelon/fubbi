@@ -226,7 +226,6 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('subscribe', 'SubscriptionController');
 
-    Route::get('keywords/{project}/{idea}', 'KeywordsController@index');
     Route::get('research', 'ResearchController@index');
     Route::get('research/load', 'ResearchController@load');
 
