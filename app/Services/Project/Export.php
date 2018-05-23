@@ -58,13 +58,10 @@ class Export
             $skip = [
                 'quora_username',
                 'quora_password',
-                'keywords',
                 'questions',
                 'themes',
                 'themes_order',
                 'conversation_id',
-                'keywords_questions',
-                'keywords_meta',
                 'seo_first_name',
                 'seo_last_name',
                 'seo_email',

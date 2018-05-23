@@ -7,7 +7,6 @@ return [
         'fubbi-silver-plan',
         'fubbi-gold-plan',
     ],
-    'keywords_count'    => 25,
     'form'              => [
         'quiz' => [
             'writing_style' => [

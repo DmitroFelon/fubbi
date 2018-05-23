@@ -22,7 +22,6 @@ class NotificationTypes
         \App\Notifications\Chat\PrivateMessage::class        => 'Private Messages',
         \App\Notifications\Client\OutstandingApproval::class => 'Outstanding Approvals',
         \App\Notifications\Client\QuizIncomplete::class      => 'Onboarding quiz incomplete',
-        \App\Notifications\Client\KeywordsIncomplete::class  => 'Keyword filling incomplete',
     ];
 
     /**

@@ -198,8 +198,6 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
-        $keywords           = $project->keywords;
-        $keywords_questions = $project->keywords_questions;
         $metadata           = $project->metaToView();
         $manager            = $project->workers()->withRole(Role::ACCOUNT_MANAGER)->first(['id']);
         $manager_id         = ($manager) ? $manager->id : null;
@@ -214,7 +212,7 @@ class ProjectController extends Controller
             $teams = Team::all();
         }
 
-        return view('entity.project.show', compact('project', 'keywords', 'keywords_questions', 'metadata', 'users', 'teams'));
+        return view('entity.project.show', compact('project', 'metadata', 'users', 'teams'));
     }
 
     /**

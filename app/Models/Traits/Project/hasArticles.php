@@ -128,11 +128,6 @@ trait hasArticles
                 'meta_name'        => 'relevance',
                 'media_collection' => ''
             ],
-            [
-                'string'           => _('Did you check the Words To Avoid list?'),
-                'meta_name'        => 'avoid_keywords',
-                'media_collection' => ''
-            ],
             /*[
                 'string'           => _('Did you check the Writing Guidelines List?'),
                 'meta_name'        => '',

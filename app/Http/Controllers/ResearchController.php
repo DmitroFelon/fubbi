@@ -16,10 +16,9 @@ class ResearchController extends Controller
     }
 
     /**
-     * @param \App\Services\Api\Keywords\KeywordsFactoryInterface $api
      * @return string
      */
-    public function load(Request $request, KeywordsFactoryInterface $api)
+    public function load(Request $request)
     {
 
         $theme = ($request->has('theme'))
@@ -70,8 +69,6 @@ class ResearchController extends Controller
                     return collect($e->getMessage());
                 }
             });
-
-        // $title = KeywordTool::getSourceName($source);
 
         return view('entity.research.partials.result', compact('title', 'questions', 'suggestions'));
     }

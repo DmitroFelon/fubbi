@@ -12,7 +12,6 @@ use App\Exceptions\Project\ImpossibleProjectState;
 use App\Facades\ProjectExport;
 use App\Models\Helpers\ProjectStates;
 use App\Models\Idea;
-use App\Models\Keyword;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -161,83 +160,6 @@ trait hasStates
         }
 
         throw new Exception('Undefined project step: ' . $request->input('_step'));
-    }
-
-    /**
-     * @param Request $request
-     * @return bool
-     */
-    private function prefillKeywords(Request $request)
-    {
-        $keywords           = collect($request->input('keywords'));
-        $keywords_questions = collect($request->input('keywords_questions'));
-        $meta               = collect($request->input('meta'));
-
-
-        $meta->each(function ($metadata, $idea_id) use ($request) {
-
-            $metafields = [
-                'points_covered',
-                'points_avoid',
-                'references',
-                'this_month',
-                'next_month',
-            ];
-
-            $idea = Idea::findOrFail($idea_id);
-
-            foreach ($metafields as $metafield) {
-                $idea->{$metafield} = $metadata[$metafield] ?? null;
-            }
-
-            $idea->save();
-        });
-
-        $keywords->each(function ($keyword_texts, $idea_id) use ($request) {
-            Idea::findOrFail($idea_id)->keywords()->suggestions()->update(
-                ['accepted' => false]
-            );
-
-            if (!is_array($keyword_texts)) {
-                return;
-            }
-
-            foreach ($keyword_texts as $keyword_text => $state) {
-                Keyword::updateOrCreate(
-                    ['idea_id' => $idea_id, 'text' => $keyword_text],
-                    [
-                        'accepted' => true,
-                        'text'     => $keyword_text,
-                        'idea_id'  => $idea_id,
-                        'type'     => Keyword::TYPE_SUGGESTION
-                    ]
-                );
-            }
-
-        });
-        $keywords_questions->each(function ($keyword_texts, $idea_id) {
-            Idea::findOrFail($idea_id)->keywords()->questions()->update(
-                ['accepted' => false]
-            );
-
-            if (!is_array($keyword_texts)) {
-                return;
-            }
-
-            foreach ($keyword_texts as $keyword_text => $state) {
-                Keyword::updateOrCreate(
-                    ['idea_id' => $idea_id, 'text' => $keyword_text],
-                    [
-                        'accepted' => true,
-                        'text'     => $keyword_text,
-                        'idea_id'  => $idea_id,
-                        'type'     => Keyword::TYPE_QUESTION
-                    ]
-                );
-            }
-
-        });
-        return true;
     }
 
     /**

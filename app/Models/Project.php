@@ -317,9 +317,6 @@ class Project extends Model implements HasMediaConversions, Invitable
         $meta_to_skip = [
             'themes_order',
             'questions',
-            'keywords_meta',
-            'keywords',
-            'keywords_questions',
             'export',
             'conversation_id'
         ];
