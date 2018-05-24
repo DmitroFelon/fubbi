@@ -40,6 +40,18 @@
     </div>
 </div>
 
-{{Form::submit(_i('Save'), ['class' => 'btn btn-primary'])}}
+{{Form::submit(_i('Save'), ['class' => 'btn btn-primary', 'id' => 'card_update'])}}
 {{Form::close()}}
 
+@section('scripts')
+<script>
+    jQuery(function ($) {
+        $('#card_update').click(function() {
+            $(this).hide();
+        });
+        $('div[class="alert-danger alert"]').on('DOMSubtreeModified', function() {
+            $('#card_update').show();
+        });
+    });
+</script>
+@endsection
