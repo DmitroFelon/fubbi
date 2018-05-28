@@ -110,12 +110,14 @@ trait hasStates
         );
 
         $this->state = $state;
+        if($state == 'accepted_by_manager') {
+            $this->fireModelEvent('acceptReview', false);
+        }
 
         if ($this->isDirty()) {
             $this->save();
             $this->fireModelEvent('setState', false);
         }
-
         return $this;
     }
 

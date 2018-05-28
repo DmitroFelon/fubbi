@@ -6,6 +6,8 @@ use App\Models\Idea;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Spatie\MediaLibrary\Media;
+use App\Services\Idea\IdeaManager;
+use App\Http\Requests\IdeaFillRequest;
 
 /**
  * Class IdeaController
@@ -64,6 +66,12 @@ class IdeaController extends Controller
 
     public function show(Idea $idea)
     {
-        return view('entity.idea.show', compact('idea'));
+        return view('entity.idea.theme_fill', compact('idea'));
+    }
+
+    public function update(IdeaManager $ideaManager, IdeaFillRequest $request, Idea $idea)
+    {
+        $ideaManager->update($request, $idea);
+        return redirect()->route('projects.show', ['project' => $idea->project_id])->with('success', 'Idea has been successfully updated!');
     }
 }

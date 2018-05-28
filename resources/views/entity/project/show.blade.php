@@ -58,7 +58,7 @@
 
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
             @component('components.ibox')
-            @slot('title') Ideas @endslot
+            @slot('title') Ideas ({{ $ideasCompleted . '/' . $ideasQuantity }} completed) @endslot
             @slot('tools')
 
             <a class="collapse-link">
@@ -68,6 +68,7 @@
             <div class="row">
                 <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                     <h3>{{_('Themes')}}</h3>
+
                     <ul>
                         @if($project->ideas()->themes()->get()->isEmpty())
                             <div class="text-muted">
@@ -75,9 +76,15 @@
                             </div>
                         @endif
                         @foreach($project->ideas()->themes()->get() as $idea)
-                            <li>
-                                <a target="_blank" href="{{action('IdeaController@show', $idea)}}">
-                                    {{$idea->theme}}
+                                @php
+                                    $theme = $idea->theme;
+                                    if(strlen($idea->theme) > 35){
+                                        $theme = substr($idea->theme, 0, 30) . '...';
+                                    }
+                                @endphp
+                                <li>
+                                <a target="_blank" href="{{action('IdeaController@show', $idea)}}" style="{{ $idea->completed ? '' : 'color:red'}}">
+                                    {{ $theme }}
                                 </a>
                             </li>
                         @endforeach
@@ -93,16 +100,22 @@
                             </div>
                         @endif
                         @foreach($project->ideas()->questions()->get() as $idea)
-                            <li>
-                                <a target="_blank" href="{{action('IdeaController@show', $idea)}}">
-                                    {{$idea->theme}}
+                                @php
+                                    $theme = $idea->theme;
+                                    if(strlen($idea->theme) > 35){
+                                        $theme = substr($idea->theme, 0, 30) . '...';
+                                    }
+                                @endphp
+                                <li>
+                                <a target="_blank" href="{{action('IdeaController@show', $idea)}}" style="{{ $idea->completed ? '' : 'color:red'}}">
+                                    {{ $theme }}
                                 </a>
                             </li>
                         @endforeach
                     </ul>
                 </div>
                 <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                    <h3>{{_('Ideas')}}</h3>
+                    <h3>{{_('Ideas') }}</h3>
                     <ul>
                         @if($project->client->inspirations->isEmpty())
                             <div class="text-muted">

@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Musonza\Chat\Conversations\Conversation;
 use Musonza\Chat\Facades\ChatFacade;
+use App\Notifications\Project\ProjectAccepted;
 
 /**
  * Class ProjectObserver
@@ -346,5 +347,22 @@ class ProjectObserver
 
     }
 
-
+    public function acceptReview(Project $project)
+    {
+        $workers = $project->workers()->get();
+        if(!$workers->isEmpty()) {
+            foreach ($workers as $worker) {
+                $worker->notify(new ProjectAccepted($project));
+            }
+        }
+        $team = $project->teams()->first();
+        if(!is_null($team)) {
+            $teamWorkers = $team->users;
+            if(!$teamWorkers->isEmpty()) {
+                foreach ($teamWorkers as $worker) {
+                    $worker->notify(new ProjectAccepted($project));
+                }
+            }
+        }
+    }
 }

@@ -62,9 +62,13 @@ class Idea extends Model implements HasMediaConversions
         'project_id',
         'type',
         'theme',
+        'article_format_type',
+        'link_to_model_article',
+        'additional_notes',
         'points_covered',
         'points_avoid',
         'references',
+        'completed',
         'this_month',
         'next_month',
     ];

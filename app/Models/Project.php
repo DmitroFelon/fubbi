@@ -143,7 +143,8 @@ class Project extends Model implements HasMediaConversions, Invitable
         'attachArticle',
         'acceptArticle',
         'declineArticle',
-        'lastDeclineArticle' //fires when writer of article has spent 3 attempts for approval
+        'lastDeclineArticle', //fires when writer of article has spent 3 attempts for approval
+        'acceptReview',
     ];
 
     /**

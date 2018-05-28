@@ -206,6 +206,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('{idea}/get_stored_idea_files', 'IdeaController@get_stored_idea_files');
         Route::get('{idea}/remove_stored_file/{media}', 'IdeaController@remove_stored_files');
         Route::get('{idea}', 'IdeaController@show');
+        Route::post('{idea}/fill', 'IdeaController@update')->name('updateIdea');
     });
 
     Route::namespace('Project')->group(

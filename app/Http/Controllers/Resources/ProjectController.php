@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Spatie\MediaLibrary\Media;
 use Stripe\Plan;
+use App\Notifications\Project\ProjectAccepted;
 
 /**
  * Class ProjectController
@@ -205,6 +206,12 @@ class ProjectController extends Controller
         $users = [];
         $teams = [];
 
+        $ideasQuantity = Idea::where('project_id', $project->id)->count();
+        $ideasCompleted = Idea::where([
+            ['project_id', $project->id],
+            ['completed', 1]
+        ])->count();
+
         if (Auth::user()->role == 'admin' or ($manager_id and $manager_id == Auth::user()->id)) {
             //get users which are not attached to this project
 
@@ -212,7 +219,7 @@ class ProjectController extends Controller
             $teams = Team::all();
         }
 
-        return view('entity.project.show', compact('project', 'metadata', 'users', 'teams'));
+        return view('entity.project.show', compact('project', 'metadata', 'users', 'teams', 'ideasQuantity', 'ideasCompleted'));
     }
 
     /**
