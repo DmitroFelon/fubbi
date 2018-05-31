@@ -4,6 +4,7 @@ namespace App\Services\Article;
 
 use App\Models\Role;
 use App\Models\Article;
+use App\Models\Project;
 use App\User;
 use Illuminate\Http\Request;
 
@@ -34,7 +35,7 @@ class ArticleRepository
      * @param $articles_query
      * @return mixed
      */
-    public function search(Request $request, $articles_query)
+    public function searchAll(Request $request, $articles_query)
     {
         if ($request->has('type') and $request->input('type') != '') {
             $articles_query->where('type', $request->input('type'));
@@ -44,6 +45,33 @@ class ArticleRepository
         }
         if ($request->has('active') and $request->input('active') != '') {
             $articles_query->where('active', true);
+        }
+        return $articles_query;
+    }
+
+    /**
+     * @param Request $request
+     * @param Project $project
+     * @return mixed
+     */
+    public function searchProject(Request $request, Project $project)
+    {
+        $articles_query = $project->articles();
+        if ($request->has('type') and $request->input('type') != '') {
+            $articles_query->where('type', $request->input('type'));
+        }
+        if ($request->has('active') and $request->input('active') != '') {
+            $current_cycle = $project->cycles()->latest('id')->first();
+            if ($current_cycle) {
+                $articles_query->where('cycle_id', $current_cycle->id);
+            }
+        }
+        if ($request->has('status') and $request->input('status') != '') {
+            if ($request->input('status') == 1) {
+                $articles_query->accepted();
+            } else {
+                $articles_query->declined();
+            }
         }
         return $articles_query;
     }

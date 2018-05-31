@@ -23,7 +23,7 @@ class ArticlesController extends Controller
     public function index(Request $request, ArticleRepository $articleRepository)
     {
         $articles_query = $articleRepository->articlesByRole($request->user());
-        $articles_query = $articleRepository->search($request, $articles_query);
+        $articles_query = $articleRepository->searchAll($request, $articles_query);
         $articles = $articles_query->paginate(10);
         $filters['types'] = Article::getAllTypes();
         $filters['statuses'] = [
