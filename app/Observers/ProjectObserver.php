@@ -214,6 +214,30 @@ class ProjectObserver
     /**
      * @param Project $project
      */
+    public function detachTeam(Project $project)
+    {
+        $team_users = $project->eventData['detachTeam'];
+        $team_id = $project->eventData['team_id'];
+        $conversation = ChatFacade::conversation($project->conversation_id);
+
+        if($conversation){
+            ChatFacade::removeParticipants($conversation, $team_id);
+        }
+
+        $team_users->each(function (User $user) use ($project) {
+            activity('project_worker')
+                ->causedBy(Auth::user())
+                ->performedOn($project)
+                ->withProperties(['worker' => $user])
+                ->log('User ' . $user->name . ' has been detached from project ' . $project->name);
+
+            $user->notify(new Detached($project));
+        });
+    }
+
+    /**
+     * @param Project $project
+     */
     public function attachWorkers(Project $project)
     {
         $worker_ids = $project->eventData['attachWorkers'];
@@ -240,11 +264,16 @@ class ProjectObserver
     public function attachTeam(Project $project)
     {
         $team = Team::find($project->eventData['attachTeam']);
+//        dd($team->users);
         activity('project_worker')
             ->causedBy(Auth::user())
             ->performedOn($project)
             ->withProperties(['team' => $team])
             ->log('Team ' . $team->name . ' has been attached to project project ' . $project->name);
+        $team->users->each(function (User $user) use ($project) {
+            $user->notify(new Attached($project, $user->role));
+        });
+
     }
 
     /**

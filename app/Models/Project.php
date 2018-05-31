@@ -140,6 +140,7 @@ class Project extends Model implements HasMediaConversions, Invitable
         'attachWorkers',
         'detachWorker',
         'attachTeam',
+        'detachTeam',
         'attachArticle',
         'acceptArticle',
         'declineArticle',

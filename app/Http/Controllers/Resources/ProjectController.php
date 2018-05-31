@@ -389,7 +389,7 @@ class ProjectController extends Controller
     {
         $message_key = 'info';
         try {
-            $project->teams()->detach($team->id);
+            $project->detachTeam($team->id);
             $message = _i("%s has been removed from project", [$team->name]);
         } catch (\Exception $e) {
             report($e);

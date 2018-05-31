@@ -40,5 +40,17 @@ trait hasTeams
         $this->fireModelEvent('attachTeam', false);
     }
 
+    /**
+     * @param $team_id
+     */
+    public function detachTeam($team_id)
+    {
+        $team = Team::find($team_id);
+        $this->teams()->detach($team_id);
+        $this->eventData['detachTeam'] = $team->users;
+        $this->eventData['team_id'] = $team_id;
+
+        $this->fireModelEvent('detachTeam', false);
+    }
 
 }
