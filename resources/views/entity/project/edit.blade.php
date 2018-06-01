@@ -34,8 +34,8 @@
                 <div class="col-xs-12 col-sm-12 col-md-8 col-lg-9">
                     <div class="row">
                         @foreach(\App\Models\Helpers\Page::getRelatedVideos() as $video)
-                            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                                <iframe id="=" type="text/html" width="100%" height="auto"
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                <iframe id="=" type="text/html" width="100%" height="400px"
                                         allowfullscreen="allowfullscreen"
                                         mozallowfullscreen="mozallowfullscreen"
                                         msallowfullscreen="msallowfullscreen"
