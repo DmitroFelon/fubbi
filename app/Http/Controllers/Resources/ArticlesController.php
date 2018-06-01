@@ -23,7 +23,7 @@ class ArticlesController extends Controller
     public function index(Request $request, ArticleRepository $articleRepository)
     {
         $articles_query = $articleRepository->articlesByRole($request->user());
-        $articles_query = $articleRepository->searchAll($request, $articles_query);
+        $articles_query = $articleRepository->searchAll($request->input(), $articles_query);
         $articles = $articles_query->paginate(10);
         $filters['types'] = Article::getAllTypes();
         $filters['statuses'] = [
@@ -51,9 +51,7 @@ class ArticlesController extends Controller
      */
     public function request_access(Request $request, Article $article, Drive $drive)
     {
-        $google_id = $article->google_id;
-        $permissions = [$request->user()->email => 'commenter'];
-        $drive->addPermission($google_id, $permissions);
+        $drive->addPermission($article->google_id, [$request->user()->email => 'commenter']);
         return redirect()->back()->with('success', 'Permissions has been provided');
     }
 
@@ -65,7 +63,7 @@ class ArticlesController extends Controller
      */
     public function export(Article $article, Request $request, ArticleExport $articleExport)
     {
-        return $articleExport->singleExport($article, $request);
+        return $articleExport->singleExport($article, $request->only(['as', 'show']));
     }
 
     /**
@@ -75,6 +73,6 @@ class ArticlesController extends Controller
      */
     public function batch_export(Request $request, ArticleExport $articleExport)
     {
-        return $articleExport->batchExport($request);
+        return $articleExport->batchExport($request->only(['as', 'ids']));
     }
 }

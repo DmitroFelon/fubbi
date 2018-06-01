@@ -35,7 +35,7 @@ class ArticlesController extends Controller
      */
     public function index(Project $project, Request $request, ArticleRepository $articleRepository)
     {
-        $articles_query = $articleRepository->searchProject($request, $project);
+        $articles_query = $articleRepository->searchProject($request->input(), $project);
         $articles = $articles_query->paginate(10);
         $filters['types'] = Article::getTypes($project);
         $filters['statuses'] = [
@@ -117,7 +117,7 @@ class ArticlesController extends Controller
      */
     public function save_social_posts(Project $project, Article $article, Request $request, ArticleManager $articleManager)
     {
-        $articleManager->saveSocialPosts($project, $article, $request);
+        $articleManager->saveSocialPosts($project, $article, $request->input());
         return redirect()->back()->with('success', _i('Article updated'));
     }
 
@@ -151,7 +151,7 @@ class ArticlesController extends Controller
      */
     public function rate(Article $article, Request $request, ArticleManager $articleManager)
     {
-        $articleManager->rate($request, $article);
+        $articleManager->rate($request->user(), $article, $request->input('rate'));
         return response()->json(['result' => true]);
     }
 }

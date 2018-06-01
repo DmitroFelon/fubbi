@@ -11,6 +11,7 @@ namespace App\Services\Article;
 use App\Models\Article;
 use App\Models\Project;
 use App\Models\Idea;
+use App\User;
 use Illuminate\Http\Request;
 use App\Jobs\GoogleDrive\GoogleDriveCreate;
 use App\Jobs\GoogleDrive\GoogleDriveUpload;
@@ -35,30 +36,31 @@ class ArticleManager
     }
 
     /**
-     * @param Request $request
+     * @param User $user
      * @param Article $article
+     * @param $rate
      */
-    public function rate(Request $request, Article $article)
+    public function rate(User $user, Article $article, $rate)
     {
-        $request->user()->relatedClientArticles()
+        $user->relatedClientArticles()
             ->findOrFail($article->id)
             ->ratingUnique(
-                ['rating' => $request->input('rate')],
-                $request->user()
+                ['rating' => $rate],
+                $user
             );
     }
 
     /**
      * @param Project $project
      * @param Article $article
-     * @param Request $request
+     * @param array $request
      */
-    public function saveSocialPosts(Project $project, Article $article, Request $request)
+    public function saveSocialPosts(Project $project, Article $article, array $request)
     {
         $article = $project->articles()->findOrFail($article->id);
-        $article->setMeta('socialposts', $request->input('socialposts'));
-        $article->type = $request->input('type');
-        $tags = collect(explode(',', $request->input('tags')));
+        $article->setMeta('socialposts', $request['socialposts']);
+        $article->type = $request['type'];
+        $tags = collect(explode(',', $request['tags']));
         $article->syncTags([]);
         $tags->each(function ($tag) use ($article) {
             $article->attachTagsHelper($tag);
@@ -90,45 +92,55 @@ class ArticleManager
         //if article should be published next month
         $article->cycle_id = 0;
         $article->save();
-        $this->uploadFile($request, $article, $project);
-        $this->uploadCopyscape($request, $article);
-    }
-
-    /**
-     * @param Request $request
-     * @param Article $article
-     * @param Project $project
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function uploadFile(Request $request, Article $article, Project $project)
-    {
-        if ($request->hasFile('file')) {
-            try {
-                $file = $article->addMedia($request->file('file'))->toMediaCollection('file');
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', $e->getMessage());
-            }
-            $file_name = $article->generateTitle();
-            GoogleDriveUpload::dispatch($project, $article, $file, $file_name);
-        } else {
-            $file_name = $article->generateTitle();
-            GoogleDriveCreate::dispatch($project, $article, $file_name);
+        if($request->has('file')){
+            $this->uploadFile($request, $article, $project);
+        }
+        else {
+            $this->createFile($article, $project);
+        }
+        if ($request->hasFile('copyscape')) {
+            $this->uploadCopyscape($request->file('copyscape'), $article);
         }
     }
 
     /**
-     * @param Request $request
+     * @param $file
+     * @param Article $article
+     * @param Project $project
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function uploadFile($file, Article $article, Project $project)
+    {
+        try {
+            $file = $article->addMedia($file)->toMediaCollection('file');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+        $file_name = $article->generateTitle();
+        GoogleDriveUpload::dispatch($project, $article, $file, $file_name);
+    }
+
+    /**
+     * @param Article $article
+     * @param Project $project
+     */
+    public function createFile(Article $article, Project $project)
+    {
+        $file_name = $article->generateTitle();
+        GoogleDriveCreate::dispatch($project, $article, $file_name);
+    }
+
+    /**
+     * @param $file
      * @param Article $article
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function uploadCopyscape(Request $request, Article $article)
+    public function uploadCopyscape($file, Article $article)
     {
-        if ($request->hasFile('copyscape')) {
-            try {
-                $article->addMedia($request->file('copyscape'))->toMediaCollection('copyscape');
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', $e->getMessage());
-            }
+        try {
+            $article->addMedia($file)->toMediaCollection('copyscape');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 }

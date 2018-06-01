@@ -8,7 +8,6 @@
 
 namespace App\Services\Article;
 
-use Illuminate\Http\Request;
 use App\Services\Google\Drive;
 use App\Models\Article;
 
@@ -20,17 +19,22 @@ class ArticleExport
 {
     /**
      * @param Article $article
-     * @param Request $request
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\RedirectResponse|\Symfony\Component\HttpFoundation\BinaryFileResponse|\Symfony\Component\HttpFoundation\Response
+     * @param array $request
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\RedirectResponse|string|\Symfony\Component\HttpFoundation\BinaryFileResponse|\Symfony\Component\HttpFoundation\Response
      */
-    public function singleExport(Article $article, Request $request)
+    public function singleExport(Article $article, array $request)
     {
+        $type = $this->type($request);
         try {
-            $type = $this->type($request);
             $media = $article->export($type);
-            return response()->download($media->getPath(), $article->title . '.' . Drive::getExtension($type));
+            if (!array_key_exists('show', $request)) {
+                return response()->download($media->getPath(), $article->title . '.' . Drive::getExtension($type));
+            }
+            else {
+                return $media->getFullUrl();
+            }
         } catch (\Exception $e) {
-            if (!$request->has('show')) {
+            if (!array_key_exists('showss', $request)) {
                 return redirect()->back()->with('error', _i('Some error happened while exporting, try later please.'));
             } else {
                 return response(['error' => 'Some error happened while exporting, try later please.'], 400);
@@ -39,13 +43,13 @@ class ArticleExport
     }
 
     /**
-     * @param Request $request
+     * @param array $request
      * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\RedirectResponse|\Symfony\Component\HttpFoundation\BinaryFileResponse|\Symfony\Component\HttpFoundation\Response
      */
-    public function batchExport(Request $request)
+    public function batchExport(array $request)
     {
         $type = $this->type($request);
-        $ids = $request->has('ids') ? $request->input('ids') : [];
+        $ids = array_key_exists('ids', $request) ? $request['ids'] : [];
         $path      = storage_path('app/public/exports/');
         $zipper    = new \Chumper\Zipper\Zipper;
         $zip_name  = rand() . '.zip';
@@ -82,13 +86,11 @@ class ArticleExport
     }
 
     /**
-     * @param Request $request
-     * @return array|string
+     * @param array $request
+     * @return mixed|string
      */
-    public function type(Request $request)
+    public function type(array $request)
     {
-        $type = ($request->has('as')) ? $request->input('as') : Drive::MS_WORD;
-        return $type;
+        return array_key_exists('as', $request) ? $request['as'] : Drive::MS_WORD;
     }
-
 }
