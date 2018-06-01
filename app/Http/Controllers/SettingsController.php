@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Helpers\NotificationTypes;
+use App\Services\User\UserManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
 
 /**
  * Class SettingsController
@@ -18,81 +18,34 @@ class SettingsController extends Controller
      */
     public function index()
     {
-        $user = Auth::user();
-
         $data = [
-            'notifications_checkboxes' => NotificationTypes::get($user->role),
-            'user'                     => $user,
+            'notifications_checkboxes' => NotificationTypes::get(Auth::user()->role),
+            'user'                     => Auth::user(),
         ];
-
         return view('entity.user.settings', $data);
     }
 
-
     /**
      * @param Request $request
-     * @return mixed
+     * @param UserManager $userManager
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function save(Request $request)
+    public function save(Request $request, UserManager $userManager)
     {
-        $user = Auth::user();
-
-        $disabled_notifications = ($request->has('disabled_notifications'))
-            ? $request->input('disabled_notifications')
-            : [];
-
-        $disabled_notifications = collect(array_keys($disabled_notifications))->transform(function ($disabled_notification) {
-            return ['name' => $disabled_notification];
-        });
-
-        $user->disabled_notifications()->delete();
-
-        $user->disabled_notifications()->createMany(
-            $disabled_notifications->toArray()
-        );
-
-        return redirect()->back()->with(
-            'success', _i('Notification options have beed saved')
-        );
-
+        $userManager->notifications($request->user(), $request->input());
+        return redirect()->back()->with('success', _i('Notification options have been saved'));
     }
 
     /**
      * @param Request $request
-     * @return mixed
+     * @param UserManager $userManager
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function billing(Request $request)
+    public function billing(Request $request, UserManager $userManager)
     {
-        $user = Auth::user();
-
         if ($request->input('stripeToken')) {
-            try {
-                if (!is_null($user->stripe_id)) {
-                    try {
-                        $user->updateCard($request->input('stripeToken'));
-                    } catch (\Exception $e) {
-                        return back()->with('error', 'Something wrong happened while billing info updating, please try later.');
-                    }
-                    return redirect()->back()->with(
-                        'success', _i('Card has been updated Successfully')
-                    );
-                }
-                else {
-                    $user->createAsStripeCustomer($request->input('stripeToken'));
-                    return redirect()->back()->with(
-                        'success', _i('Card has been created Successfully')
-                    );
-                }
-            } catch (\Stripe\Error\Card $e) {
-                $body  = $e->getJsonBody();
-                $error = $body['error'];
-                return redirect()->back()->with(
-                    'error', $error['message']
-                );
-            }
+            $userManager->billing($request->user(), $request->input());
         }
-
-
         return back()->with('error', 'Something wrong happened while billing info updating, please try later.');
     }
 }

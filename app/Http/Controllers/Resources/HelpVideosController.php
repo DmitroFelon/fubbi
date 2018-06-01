@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Resources;
 use App\Http\Controllers\Controller;
 use App\Models\Helpers\Page;
 use App\Models\HelpVideo;
-use Illuminate\Http\Request;
 use App\Http\Requests\CreateOrUpdateHelpVideoRequest;
 
+/**
+ * Class HelpVideosController
+ * @package App\Http\Controllers\Resources
+ */
 class HelpVideosController extends Controller
 {
     /**
@@ -32,17 +35,14 @@ class HelpVideosController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
+     * @param CreateOrUpdateHelpVideoRequest $request
      * @param HelpVideo $helpVideo
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(CreateOrUpdateHelpVideoRequest $request, HelpVideo $helpVideo)
     {
         $helpVideo->fill($request->except(['_token', '_method']));
         $helpVideo->save();
-
         return redirect()->action('Resources\HelpVideosController@index')->with('success', _i('Video has been created.'));
     }
 
@@ -70,17 +70,14 @@ class HelpVideosController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
+     * @param CreateOrUpdateHelpVideoRequest $request
      * @param HelpVideo $helpVideo
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(CreateOrUpdateHelpVideoRequest $request, HelpVideo $helpVideo)
     {
         $helpVideo->fill($request->except(['_token', '_method']));
         $helpVideo->save();
-
         return redirect()->action('Resources\HelpVideosController@index')->with('success', _i('Video has been updated.'));
     }
 
@@ -94,7 +91,6 @@ class HelpVideosController extends Controller
     public function destroy(HelpVideo $helpVideo)
     {
         $helpVideo->delete();
-
         return redirect()->action('Resources\HelpVideosController@index')->with('success', _i('Video has been removed.'));
     }
 }

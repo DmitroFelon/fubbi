@@ -236,8 +236,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('', ['as' => 'settings', 'uses' => 'SettingsController@index']);
     });
 
-    Route::post('/email_reset', 'ResetEmailController@sendEmail')->name('sendEmail');
-    Route::get('/email_reset/{token}', 'ResetEmailController@reset')->name('resetEmail');
+    Route::post('/email_reset', 'Auth\ResetEmailController@sendEmail')->name('sendEmail');
+    Route::get('/email_reset/{token}', 'Auth\ResetEmailController@reset')->name('resetEmail');
 
     Route::get('/{page?}/{action?}/{id?}', 'DashboardController@index');
 

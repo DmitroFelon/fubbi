@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Resources;
 
 use App\Http\Controllers\Controller;
 use App\Models\Issue;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\CreateIssueReportRequest;
+use App\Services\Issue\IssueManager;
 
+/**
+ * Class IssueController
+ * @package App\Http\Controllers\Resources
+ */
 class IssueController extends Controller
 {
     /**
@@ -17,9 +20,7 @@ class IssueController extends Controller
      */
     public function index()
     {
-        $issues = Issue::orderBy('state')->simplePaginate(15);
-
-        return view('entity.issue.index', ['issues' => $issues]);
+        return view('entity.issue.index', ['issues' => Issue::orderBy('state')->simplePaginate(15)]);
     }
 
     /**
@@ -33,31 +34,17 @@ class IssueController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
+     * @param CreateIssueReportRequest $request
      * @param Issue $issue
-     * @return \Illuminate\Http\Response
+     * @param IssueManager $issueManager
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(CreateIssueReportRequest $request, Issue $issue)
+    public function store(CreateIssueReportRequest $request, Issue $issue, IssueManager $issueManager)
     {
-        $issue->fill($request->all());
-
-        $issue->user_id = Auth::user()->id;
-
-        $issue->state = Issue::STATE_CREATED;
-
-        $issue->save();
-
-        $tags = collect(explode(',', $request->input('tags')));
-
-        $tags->each(function ($tag) use ($issue) {
-            $issue->attachTagsHelper($tag);
-        });
-
-        $issue->save();
-
-        return redirect(action('Resources\IssueController@show', $issue))->with('success', _i('Issue created'));
+        return redirect(action(
+            'Resources\IssueController@show',
+            $issueManager->create($issue, $request->user(), $request->input())))
+            ->with('success', _i('Issue created'));
     }
 
     /**
@@ -74,23 +61,19 @@ class IssueController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request $request
      * @param Issue $issue
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Issue $issue)
+    public function update(Issue $issue)
     {
-        $issue->state = Issue::STATE_FIXED;
-        $issue->save();
-
+        $issue->update(['state' => Issue::STATE_FIXED]);
         return redirect(action('Resources\IssueController@index'))->with('success', _i('Issue updated'));
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
      * @param Issue $issue
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception
      */
     public function destroy(Issue $issue)
     {
