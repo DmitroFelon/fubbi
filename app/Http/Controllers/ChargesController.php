@@ -2,11 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Role;
-use App\User;
-use Carbon\Carbon;
+use App\Services\Charges\ChargesRepository;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Stripe\Charge;
 
 /**
@@ -15,7 +12,6 @@ use Stripe\Charge;
  */
 class ChargesController extends Controller
 {
-
     /**
      * ChargesController constructor.
      */
@@ -26,53 +22,18 @@ class ChargesController extends Controller
 
     /**
      * @param Request $request
-     * @return mixed
+     * @param ChargesRepository $chargesRepository
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function index(Request $request)
+    public function index(Request $request, ChargesRepository $chargesRepository)
     {
-
-        $date_from = now()->subYear(1)->format('m/d/Y');
-        $date_to   = now()->format('m/d/Y');
-
-        try {
-            $data = (!$request->has('customer'))
-                ? [] : ['customer' => $request->input('customer')];
-
-            if ($request->has('date_from')) {
-                $from                   = Carbon::createFromFormat('m/d/Y', $request->input('date_from'));
-                $data['created']['gte'] = $from->timestamp;
-                $date_from              = $request->input('date_from');
-            }
-
-            if ($request->has('date_to')) {
-                $to                     = Carbon::createFromFormat('m/d/Y', $request->input('date_to'));
-                $data['created']['lte'] = $to->timestamp;
-                $date_to                = $request->input('date_to');
-            }
-
-            $charges = \Stripe\Charge::all($data);
-
-            $charges = collect($charges->data);
-
-            $charges->transform(function (Charge $charge) {
-                $charge->customer = User::where('stripe_id', $charge->customer)->first();
-                return $charge;
-            });
-
-            $clients = Cache::remember('clients', 60, function () {
-                return User::withRole(Role::CLIENT)->get();
-            });
-
-            return view('pages.admin.charges.index',
-                [
-                    'charges'   => $charges,
-                    'clients'   => $clients,
-                    'date_from' => $date_from,
-                    'date_to'   => $date_to
-                ]);
-
-        } catch (\Exception $e) {
-            abort(500);
-        }
+        $data =  $chargesRepository->charges($request->input());
+        return view('pages.admin.charges.index',
+            [
+                'charges'   => $data['charges'],
+                'clients'   => $data['clients'],
+                'date_from' => $data['date_from'],
+                'date_to'   => $data['date_to']
+            ]);
     }
 }
