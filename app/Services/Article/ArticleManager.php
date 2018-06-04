@@ -93,7 +93,7 @@ class ArticleManager
         $article->cycle_id = 0;
         $article->save();
         if($request->has('file')){
-            $this->uploadFile($request, $article, $project);
+            $this->uploadFile($request->file('file'), $article, $project);
         }
         else {
             $this->createFile($article, $project);
