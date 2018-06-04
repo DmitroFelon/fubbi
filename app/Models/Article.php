@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Project\Cycle;
 use App\Models\Project\Service;
+use App\Scopes\GoogleIdScope;
 use App\Services\Google\Drive;
 use App\User;
 use BrianFaust\Commentable\Traits\HasComments;
@@ -116,6 +117,12 @@ class Article extends Model implements HasMedia
      */
     protected $dates = ['deleted_at'];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::addGlobalScope(new GoogleIdScope());
+    }
 
     /**
      * One article may belong to many projects
