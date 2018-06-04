@@ -187,12 +187,6 @@ class LeftMenuComposer
                 'order' => 100,
             ],
             [
-                'name'  => 'Research',
-                'url'   => action('ResearchController@index'),
-                'icon'  => 'fa fa-search',
-                'order' => 100,
-            ],
-            [
                 'name'  => 'Ideas',
                 'url'   => action('Resources\InspirationController@index'),
                 'icon'  => 'fa fa-lightbulb-o',

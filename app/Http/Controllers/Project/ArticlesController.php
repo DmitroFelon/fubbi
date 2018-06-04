@@ -81,8 +81,8 @@ class ArticlesController extends Controller
      */
     public function show(Project $project, Article $article)
     {
-        $article = $project->articles()->findOrFail($article->id);
-        return view('entity.article.show', compact('project', 'article'));
+        $articleClient = $project->client_id;
+        return view('entity.article.show', compact('project', 'article', 'articleClient'));
     }
 
     /**

@@ -3,6 +3,7 @@
 @section('content')
 
     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div id="message"></div>
         <div class="ibox">
             <div class="ibox-title">
                 <h5>
@@ -84,20 +85,70 @@
 @endsection
 
 @section('scripts')
+            <script>
+        // /*       $(".ratable").each(function (item) {
+        //            $(this).rateYo({
+        //                rating: $(this).attr('data-rating') + "%",
+        //                precision: 0,
+        //                readOnly: false,
+        //                fullStar: true
+        //            }).on("rateyo.set", function (e, data) {
+        //                $.post('{{action('Project\ArticlesController@rate', [$article->project, $article])}}', {
+        //                    rate: data.rating / 20
+        //                });
+        //            });
+        //        });*/
+            </script>
+
 
     <script>
-        $(".ratable").each(function (item) {
+        $(".ratable").each(function () {
+            if({{ Auth::user()->id }} == {{ $articleClient }}) {
+                var readOnly = false;
+            }
+            else {
+                var readOnly = true;
+            }
             $(this).rateYo({
                 rating: $(this).attr('data-rating') + "%",
                 precision: 0,
-                readOnly: false,
-                fullStar: true
-            }).on("rateyo.set", function (e, data) {
-                $.post('{{action('Project\ArticlesController@rate', [$article->project, $article])}}', {
-                    rate: data.rating / 20
-                });
-            });
+                readOnly: readOnly,
+                fullStar: true,
+                onSet: function (rating) {
+                    console.log(rating);
+                    $.post('{{action('Project\ArticlesController@rate', [$article])}}', {
+                        rate: rating / 20
+                    })
+                    .done(function() {
+                        $('.alert-success').remove();
+                        $('#message').append(
+                            '<div class="alert alert-success">'+
+                            'Rating has been successfully updated!'+
+                            '</div>'
+                        );
+                        $('.alert-success').delay(500).show(10, function() {
+                            $(this).delay(3000).hide(10, function() {
+                                $(this).remove();
+                            });
+                        });
+                    })
+                    .fail(function() {
+                        $('.alert-danger').remove();
+                        $('#message').append(
+                            '<div class="alert alert-danger">'+
+                            'Something wrong happened while rating info updating, please try later.'+
+                            '</div>'
+                        );
+                        $('.alert-danger').delay(500).show(10, function() {
+                            $(this).delay(3000).hide(10, function() {
+                                $(this).remove();
+                            });
+                        });
+                    });
+                }
+            })
         });
     </script>
+
 
 @endsection
