@@ -85,22 +85,6 @@
 @endsection
 
 @section('scripts')
-            <script>
-        // /*       $(".ratable").each(function (item) {
-        //            $(this).rateYo({
-        //                rating: $(this).attr('data-rating') + "%",
-        //                precision: 0,
-        //                readOnly: false,
-        //                fullStar: true
-        //            }).on("rateyo.set", function (e, data) {
-        //                $.post('{{action('Project\ArticlesController@rate', [$article->project, $article])}}', {
-        //                    rate: data.rating / 20
-        //                });
-        //            });
-        //        });*/
-            </script>
-
-
     <script>
         $(".ratable").each(function () {
             if({{ Auth::user()->id }} == {{ $articleClient }}) {

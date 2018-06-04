@@ -134,7 +134,11 @@ class PlanController extends Controller
 
         $plan           = Plan::retrieve($id);
         $plan->metadata = $input->toArray();
-        $plan->save();
+        try {
+            $plan->save();
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'You have to add metadata to plan!');
+        }
 
         return redirect()->action('Resources\PlanController@show', $id)->with('success', 'Plan has been modified succesfully');
     }
