@@ -27,7 +27,7 @@ class ChargesController extends Controller
      */
     public function index(Request $request, ChargesRepository $chargesRepository)
     {
-        $data =  $chargesRepository->charges($request->input());
+        $data = $chargesRepository->charges($request->input());
         return view('pages.admin.charges.index',
             [
                 'charges'   => $data['charges'],
@@ -37,3 +37,4 @@ class ChargesController extends Controller
             ]);
     }
 }
+
