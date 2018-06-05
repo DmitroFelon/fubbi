@@ -22,9 +22,11 @@
                                     </label>
                                 </div>
                             @else
-                                <input class="form-control" id="{{$service->name}}"
+                            <input class="form-control" id="{{$service->name}}"
                                        name="{{$service->name}}"
-                                       value="{{$service->value}}">
+                                       value="{{ gettype($service->value) == 'string' || gettype($service->value) == 'integer'
+                                       ? $service->value
+                                       : implode('-', $service->value) }}">
                             @endif
                         </td>
                     </tr>

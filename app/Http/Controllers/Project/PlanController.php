@@ -25,6 +25,11 @@ class PlanController extends Controller
         return $project->plan->id;
     }
 
+    /**
+     * @param Project $project
+     * @param $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function show(Project $project, $id)
     {
         return redirect()->action('Project\PlanController@edit', [$project, $id]);
@@ -46,27 +51,22 @@ class PlanController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param \App\Models\Project $project
-     * @param  int $id
-     * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @param Project $project
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Project $project, $id, Request $request)
+    public function update(Project $project, Request $request)
     {
-
         try {
             collect($request->input())->each(function ($item, $key) use ($project) {
-                $service = $project->services()->whereName($key)->first();
-                if ($service) {
-                    $service->customize(strval($item));
-                }
+                    $service = $project->services()->whereName($key)->first();
+                    if ($service) {
+                        $service->customize(strval($item));
+                    }
             });
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
-
-        return redirect()->back()->with('success', 'Plan has been modified succesfully');
+        return redirect()->back()->with('success', 'Plan has been modified successfully');
     }
 }
