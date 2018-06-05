@@ -30,21 +30,18 @@ class DeclinedArticlesComposer
 
     public function compose(View $view)
     {
-
         $key = 'declined_articles'
             . Auth::user()->role
             . $this->request->input('customer')
             . $this->request->input('date_from')
             . $this->request->input('date_to');
-
         $declined_articles = Cache::remember(base64_encode($key), Carbon::MINUTES_PER_HOUR * Carbon::HOURS_PER_DAY, function () {
             if (Auth::user()->role == Role::ADMIN) {
                 $query = Article::declined();
             } else {
                 $query = Auth::user()->articles()->declined();
             }
-
-            if ($this->request->has('customer') and $this->request->input('customer') > 0) {
+            if ($this->request->has('customer') and $this->request->input('customer') != '') {
                 $user = User::search($this->request->input('customer'))->first();
                 if ($user) {
                     $client_id = $user->id;
@@ -53,20 +50,16 @@ class DeclinedArticlesComposer
                     });
                 }
             }
-
             if ($this->request->has('date_from')) {
                 $from = Carbon::createFromFormat('m/d/Y', $this->request->input('date_from'));
-                $query->where('created_at', '>', $from);
+                $query->where('updated_at', '>', $from);
             }
-
             if ($this->request->has('date_to')) {
                 $to = Carbon::createFromFormat('m/d/Y', $this->request->input('date_to'));
-                $query->where('created_at', '<', $to);
+                $query->where('updated_at', '<', $to);
             }
-
             return $query->get();
         });
-
         return $view->with(compact('declined_articles', 'declined_articles_count'));
     }
 }

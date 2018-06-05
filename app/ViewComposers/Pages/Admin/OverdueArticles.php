@@ -45,14 +45,12 @@ class OverdueArticles
         $key = 'overdue_articles'. $this->request->input('overdue').$this->request->input('customer');
         $articles = Cache::remember(base64_encode($key), Carbon::MINUTES_PER_HOUR * Carbon::HOURS_PER_DAY, function () {
             $overdue = $this->request->input('overdue');
-
             if (Auth::user()->role == Role::ADMIN) {
                 $query = Article::new();
             } else {
                 $query = Auth::user()->articles()->new();
             }
-
-            if ($this->request->has('customer') and $this->request->input('customer') > 0) {
+            if ($this->request->has('customer') and $this->request->input('customer') != '') {
                 $user = User::search($this->request->input('customer'))->first();
                 if ($user) {
                     $client_id = $user->id;
@@ -61,11 +59,8 @@ class OverdueArticles
                     });
                 }
             }
-
             $query->overdue($overdue);
-
             return $query->get();
-
         });
         return $view->with(compact('articles'));
     }
