@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Notification\NotificationManager;
+use App\Services\Notification\NotificationRepository;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Musonza\Chat\Notifications\MessageSent;
 
 /**
  * Class NotificationController
@@ -13,51 +13,46 @@ use Musonza\Chat\Notifications\MessageSent;
  */
 class NotificationController extends Controller
 {
-    public function index()
+    /**
+     * @param NotificationRepository $notificationRepository
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function index(NotificationRepository $notificationRepository)
     {
-        $user = Auth::user();
-
-        $page_notifications = $user
-            ->notifications()
-            ->where('type', '!=', MessageSent::class)
-            ->paginate(10);
-
-        $has_unread_notifications = $user
-            ->unreadNotifications()
-            ->where('type', '!=', MessageSent::class)
-            ->get()->isNotEmpty();
-
-        $data = [
-            'page_notifications'       => $page_notifications,
-            'has_unread_notifications' => $has_unread_notifications,
-        ];
-
+        $data = $notificationRepository->allUserNotifications(Auth::user());
         return view('entity.notification.index', $data);
     }
 
-    public function show($id)
+    /**
+     * @param $id
+     * @param NotificationManager $notificationManager
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
+    public function show($id, NotificationManager $notificationManager)
     {
-        $notification = Auth::user()->unreadNotifications()->findOrFail($id);
-        $notification->markAsRead();
-
+        $notification = Auth::user()->notifications()->findOrFail($id);
+        $notificationManager->read($notification);
         return redirect($notification->data['link']);
     }
 
     /**
-     * @param null $id
-     * @return mixed
+     * @param $id
+     * @param NotificationManager $notificationManager
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function read($id = null)
+    public function read($id, NotificationManager $notificationManager)
     {
-        if (!is_null($id)) {
-            $notification = Auth::user()->notifications()->where('id', $id)->first();
-            if (!is_null($notification)) {
-                $notification->markAsRead();
-            }
-        } else {
-            Auth::user()->unreadNotifications->markAsRead();
-        }
+        $notificationManager->read(Auth::user()->notifications()->findOrFail($id));
+        return redirect('notification');
+    }
 
+    /**
+     * @param NotificationManager $notificationManager
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
+    public function readAll(NotificationManager $notificationManager)
+    {
+        $notificationManager->read(Auth::user()->unreadNotifications);
         return redirect('notification');
     }
 }

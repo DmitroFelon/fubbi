@@ -15,7 +15,7 @@
                 <div class="col-xs-12 col-sm-12 col-md-10 col-lg-10 col-md-push-1 col-lg-push-1">
                     <div class="row">
                         @if($has_unread_notifications)
-                            <a href="{{url('notification/read/')}}" class="btn btn-default btn-xs pull-right">
+                            <a href="{{ route('notification.read.all') }}" class="btn btn-default btn-xs pull-right">
                                 {{_i('Mart all as read')}}
                             </a>
                             <br>

@@ -123,7 +123,8 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('notification')->group(
         function () {
             Route::get('show/{id}', 'NotificationController@show');
-            Route::get('read/{id?}', 'NotificationController@read');
+            Route::get('read/{id?}', 'NotificationController@read')->name('notification.read.id');
+            Route::get('read_all', 'NotificationController@readAll')->name('notification.read.all');
             Route::get('', 'NotificationController@index');
         }
     );
