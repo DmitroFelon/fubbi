@@ -12,12 +12,6 @@
     <div class="ibox">
         <div class="ibox-title">
             <h5>{{_i('All projects assigned to this account')}}</h5>
-            @can('project.create')
-                <div class="ibox-tools">
-                    <a target="_blank" href="{{route('projects.create')}}"
-                       class="btn btn-primary btn-xs">{{_i('Create new project')}}</a>
-                </div>
-            @endcan
         </div>
         <div class="ibox-content">
             <div class="row m-b-sm m-t-sm">

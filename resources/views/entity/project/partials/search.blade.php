@@ -8,15 +8,15 @@
 {{Form::open(['action' => 'Resources\ProjectController@index', 'method' => 'get'])}}
 <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
     <input type="text"
-           value="{{(request()->input('customer'))?request()->input('customer'):''}}"
-           name="customer"
+           value="{{(request()->input('search'))?request()->input('search'):''}}"
+           name="search"
            id="customer-select"
            data-provide="typeahead"
-           data-source='{{$search_suggestions}}'
-           placeholder="{{_i('Search customer')}}"
+           data-source='{{$searchSuggestions}}'
+           placeholder="{{_i('Search')}}"
            autocomplete="off"
            class="input form-control">
-    <small class="description">{{_i('Start typing client\'s name or email')}}</small>
+    <small class="description">{{_i('Start typing client\'s name, email or project name')}}</small>
 </div>
 <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
     {{ Form::select(

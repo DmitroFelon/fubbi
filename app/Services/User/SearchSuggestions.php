@@ -8,7 +8,6 @@
 
 namespace App\Services\User;
 
-
 use App\User;
 use Illuminate\Support\Facades\Cache;
 
@@ -21,12 +20,11 @@ class SearchSuggestions
 
     /**
      * @param string $role
-     * @return array
+     * @return mixed
      */
     public static function get(string $role = '*')
     {
         Cache::forget($role . '_user_search_suggestions');
-
         return Cache::remember(
             $role . '_user_search_suggestions', 60, function () use ($role) {
             $search_suggestions = collect();
@@ -45,17 +43,16 @@ class SearchSuggestions
                     }
                 );
             }
-
             return $search_suggestions->toArray();
         });
     }
 
     /**
      * @param string $role
-     * @return string
+     * @return mixed
      */
     public static function toView(string $role = '*')
     {
-        return '["' . implode('", "', self::get($role)) . '"]';
+        return self::get($role);
     }
 }

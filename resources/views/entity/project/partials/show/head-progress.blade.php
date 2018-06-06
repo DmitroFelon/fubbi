@@ -16,7 +16,7 @@
 <hr>
 
 
-<h3 class="m-b-lg">{{_i('Total artcles:')}}</h3>
+<h3 class="m-b-lg">{{_i('Total articles:')}}</h3>
 
 <div class="row">
     <div class="col-lg-4">

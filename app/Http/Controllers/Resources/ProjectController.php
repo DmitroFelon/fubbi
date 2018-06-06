@@ -9,24 +9,18 @@ use App\Models\Idea;
 use App\Models\Project;
 use App\Models\Role;
 use App\Models\Team;
-use App\Services\User\SearchSuggestions;
+use App\Services\User\SearchSuggestions as UserSearchSuggestions;
+use App\Services\Project\SearchSuggestions as ProjectSearchSuggestions;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\View;
 use Spatie\MediaLibrary\Media;
 use Stripe\Plan;
-use App\Notifications\Project\ProjectAccepted;
 
 /**
  * Class ProjectController
@@ -47,7 +41,6 @@ class ProjectController extends Controller
      */
     public function __construct(Project $project)
     {
-
         $this->project = $project;
 
         $this->middleware('can:index,' . Project::class)->only(['index']);
@@ -65,94 +58,84 @@ class ProjectController extends Controller
         $this->middleware('can:project.apply_to_project,project')->only(['apply_to_project']);
     }
 
+
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\RedirectResponse|\Illuminate\View\View
      */
     public function index(Request $request)
-    {
-        $user = Auth::user();
+        {
+            $user = Auth::user();
+            if ($user->projects->count() == 1) {
+                return redirect()->action('Resources\ProjectController@show', $user->projects->first());
+            }
+            switch ($user->role) {
+                case \App\Models\Role::ADMIN:
+                    $projects = $this->project->query();
+                    if ($request->has('search') and $request->input('search') != '') {
+                        $search = $request->input('search');
+                        $clients = User::search($search)->get();
+                        if (!$clients->isEmpty()) {
+                            $in = [];
+                            foreach ($clients as $client) {
+                                array_push($in, $client->id);
+                            }
+                            $projects = $projects->where(function($query) use($in, $search) {
+                                $query->whereIn('client_id', $in)->orWhere('name', 'like', '%' . $search . '%');
+                            });
+                        }
+                        else {
+                            $projects = $projects->where('name', 'like', '%' . $request->input('search') . '%');
+                        }
+                    }
+                    if ($request->has('status') and $request->get('status')) {
+                        if ($request->get('status') == 'active') {
+                            $projects = $projects->whereHas('subscription', function ($query) {
+                                $query->whereNotNull('ends_at');
+                            });
+                        } else {
+                            $projects = $projects->whereHas('subscription', function ($query) {
+                                $query->whereNull('ends_at');
+                            });
+                        }
+                    }
+                    if ($request->has('month') and $request->get('month')) {
+                        $projects = $projects->where('created_at', '>=', Carbon::now()->subMonth($request->get('month')));
+                    }
+                    $projects = $projects->paginate(10);
+                    break;
+                case \App\Models\Role::CLIENT:
+                    $projects = $user->projects()->paginate(10);
+                    if ($projects->isEmpty()) {
+                        return redirect()->action('Resources\InspirationController@index');
+                    }
+                    break;
+                default:
+                    //if user accepted to the project personally
+                    $projects = $user->projects()->get();
+                    $projects = $user->teamProjects()->merge($projects);
+                    break;
+            }
+            $filters = [];
+            $filters['months'] = [
+                ''   => _('All time'),
+                '1'  => _('1 month'),
+                '3'  => _('3 months'),
+                '6'  => _('6 months'),
+                '12' => _('12 months'),
+            ];
+            $filters['status'] = [
+                ''         => _i('Any status'),
+                'active'   => _i('Active'),
+                'deactive' => _i('Inactive'),
 
-        if ($user->projects->count() == 1) {
-            return redirect()->action('Resources\ProjectController@show', $user->projects->first());
+            ];
+            $projectSuggestions = ProjectSearchSuggestions::toView();
+            $userSuggestions = UserSearchSuggestions::toView(Role::CLIENT);
+            $searchSuggestions = '["' . implode('", "', $userSuggestions) . '", "' . implode('", "', $projectSuggestions) . '"]';
+            return view('entity.project.index', compact('projects', 'filters', 'searchSuggestions'));
         }
 
-        switch ($user->role) {
-            case \App\Models\Role::ADMIN:
-                $projects = $this->project->query();
-
-                if ($request->has('status') and $request->get('status')) {
-                    if ($request->get('status') == 'active') {
-                        $projects = $projects->whereHas('subscription', function ($query) {
-                            $query->whereNull('ends_at');
-                        });
-                    } else {
-                        $projects = $projects->whereHas('subscription', function ($query) {
-                            $query->whereNotNull('ends_at');
-                        });
-                    }
-                }
-
-                if ($request->has('customer') and $request->get('customer') != '') {
-                    $client = User::search($request->input('customer'))->first();
-                    if ($client) {
-                        $projects = $projects->where('client_id', $client->id);
-                    } else {
-                        Session::flash('error', _('Client not found'));
-                    }
-
-                }
-
-                if ($request->has('month') and $request->get('month')) {
-                    $projects = $projects->where('created_at', '>=', Carbon::now()->subMonth($request->get('month')));
-                }
-
-                $projects = $projects->paginate(10);
-                break;
-            case \App\Models\Role::CLIENT:
-                $projects = $user->projects()->paginate(10);
-                if ($projects->isEmpty()) {
-                    return redirect()->action('Resources\InspirationController@index');
-                }
-                break;
-            default:
-                //if user accepted to the project personally
-                $projects = $user->projects()->get();
-                $projects = $user->teamProjects()->merge($projects);
-
-                break;
-        }
-
-        $filters = [];
-
-        $filters['users'] = User::without(['notifications', 'invites'])->withRole(Role::CLIENT)
-                                ->get(['id', 'first_name', 'last_name', 'email']);
-        //prepare and filter users for the view
-        $clients          = $filters['users']->keyBy('id')->transform(function (User $user) {
-            return $user->name;
-        });
-        $filters['users'] = $clients->filter()->put('', _i('All clients'))->reverse()->toArray();
-
-        $filters['months'] = [
-            ''   => _('All time'),
-            '1'  => _('1 month'),
-            '3'  => _('3 months'),
-            '6'  => _('6 months'),
-            '12' => _('12 months'),
-        ];
-
-        $filters['status'] = [
-            ''         => _i('Any status'),
-            'active'   => _i('Active'),
-            'deactive' => _i('Inactive'),
-
-        ];
-
-        $search_suggestions = SearchSuggestions::toView(Role::CLIENT);
-
-        return view('entity.project.index', compact('projects', 'filters', 'search_suggestions'));
-    }
 
     /**
      * Show the form for creating a new resource.

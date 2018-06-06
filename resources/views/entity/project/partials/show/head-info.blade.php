@@ -84,7 +84,7 @@
         </dl>
     </div>
     <div class="col-lg-4">
-        <h3 class="m-b-md text-center">{{_i('Plan requirments')}}</h3>
+        <h3 class="m-b-md text-center">{{_i('Plan requirements')}}</h3>
         <dl class="dl-horizontal">
             @foreach($project->services as $service)
                 <dt>
