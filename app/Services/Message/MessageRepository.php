@@ -56,7 +56,11 @@ class MessageRepository
         if ($conversations->count() == 1 and !array_key_exists('c', $params)) {
             return redirect()->action('Resources\MessageController@index', ['c' => $conversations->first()->id]);
         }
-        return $conversations;
+        return view('entity.chat.index', [
+            'conversations'     => $conversations,
+            'has_conversations' => $conversations
+        ]);
+
     }
 
     /**

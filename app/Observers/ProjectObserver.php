@@ -217,20 +217,14 @@ class ProjectObserver
     public function detachTeam(Project $project)
     {
         $team_users = $project->eventData['detachTeam'];
-        $team_id = $project->eventData['team_id'];
         $conversation = ChatFacade::conversation($project->conversation_id);
-
-        if($conversation){
-            ChatFacade::removeParticipants($conversation, $team_id);
-        }
-
-        $team_users->each(function (User $user) use ($project) {
+        $team_users->each(function (User $user) use ($project, $conversation) {
+            ChatFacade::removeParticipants($conversation, $user->id);
             activity('project_worker')
                 ->causedBy(Auth::user())
                 ->performedOn($project)
                 ->withProperties(['worker' => $user])
                 ->log('User ' . $user->name . ' has been detached from project ' . $project->name);
-
             $user->notify(new Detached($project));
         });
     }
@@ -241,11 +235,12 @@ class ProjectObserver
     public function attachWorkers(Project $project)
     {
         $worker_ids = $project->eventData['attachWorkers'];
-
+        $conversation = ChatFacade::conversation($project->conversation_id);
         $workers = User::findMany($worker_ids);
-
+        $workers->each(function($worker) use ($conversation) {
+            ChatFacade::addParticipants($conversation, $worker->id);
+        });
         $attached_users_names = implode(', ', $workers->pluck('name')->toArray());
-
         activity('project_worker')
             ->causedBy(Auth::user())
             ->performedOn($project)
@@ -255,7 +250,6 @@ class ProjectObserver
         $workers->each(function (User $user) use ($project) {
             $user->notify(new Attached($project, $user->role));
         });
-
     }
 
     /**
@@ -264,7 +258,11 @@ class ProjectObserver
     public function attachTeam(Project $project)
     {
         $team = Team::find($project->eventData['attachTeam']);
-//        dd($team->users);
+        $conversation = ChatFacade::conversation($project->conversation_id);
+
+        $team->users->each(function($user) use($conversation) {
+            ChatFacade::addParticipants($conversation, $user->id);
+        });
         activity('project_worker')
             ->causedBy(Auth::user())
             ->performedOn($project)

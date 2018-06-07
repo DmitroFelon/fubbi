@@ -26,11 +26,7 @@ class MessageController extends Controller
      */
     public function index(Chat $chat, Request $request, MessageRepository $messageRepository)
     {
-        $conversations = $messageRepository->conversations(Auth::user(), $chat, $request->input());
-        return view('entity.chat.index', [
-            'conversations'     => $conversations,
-            'has_conversations' => $conversations->isNotEmpty()
-        ]);
+        return $messageRepository->conversations(Auth::user(), $chat, $request->input());
     }
 
     /**
