@@ -17,7 +17,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Kodeine\Metable\Metable;
 use Laravel\Cashier\Billable;
 use Laravel\Scout\Searchable;
@@ -28,8 +27,6 @@ use Musonza\Chat\Notifications\MessageSent;
 use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
 use Spatie\MediaLibrary\HasMedia\Interfaces\HasMedia;
 use Zizaco\Entrust\Traits\EntrustUserTrait;
-use Illuminate\Support\Str;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 
@@ -125,11 +122,6 @@ class User extends Authenticatable implements HasMedia
     protected $metaTable = 'user_meta';
 
     /**
-     * @var array
-     */
-    protected $searchble = [];
-
-    /**
      * The attributes that should be hidden for arrays.
      *
      * @var array
@@ -155,22 +147,6 @@ class User extends Authenticatable implements HasMedia
      * @var array
      */
     protected $appends = ['role'];
-
-    public function changeEmailRequestData($email)
-    {
-        $token = Str::random(60);
-        DB::table('reset_email')->insert([
-            'email' => $email,
-            'token' => $token,
-            'created_at' => Carbon::now()
-        ]);
-        return $token;
-    }
-
-    public function findByResetToken($token)
-    {
-        return DB::table('reset_email')->select('email')->where('token', $token)->first();
-    }
 
     public function resetEmail($email, $token)
     {

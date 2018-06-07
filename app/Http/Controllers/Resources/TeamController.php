@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Resources;
 
 use App\Http\Controllers\Controller;
 use App\Models\Team;
-use App\User;
+use App\Services\Team\TeamManager;
+use App\Services\Team\TeamRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\CreateOrUpdateTeamRequest;
@@ -30,37 +31,24 @@ class TeamController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @param TeamRepository $teamRepository
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function index()
+    public function index(TeamRepository $teamRepository)
     {
         $user = Auth::user();
-        switch ($user->role) {
-            case 'admin':
-                $teams = Team::with('users')->get();
-
-                break;
-            case 'client':
-                $teams = $user->teams()->with('users')->get();
-                if ($teams->isEmpty()) {
-                    return redirect()->action('Resources\InspirationController@index');
-                }
-                break;
-            default:
-                $teams = $user->teams()->with('users')->get();
-
-                break;
+        $teams = $teamRepository->teams($user);
+        if($teams->isEmpty() && $user->role == 'client') {
+            return redirect()->action('Resources\InspirationController@index');
         }
-
-        return view('entity.team.index', ['teams' => $teams]);
+        else {
+            return view('entity.team.index', ['teams' => $teams]);
+        }
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @param Team $team
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function create(Team $team)
     {
@@ -70,34 +58,20 @@ class TeamController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
+     * @param CreateOrUpdateTeamRequest $request
      * @param Team $team
-     * @return \Illuminate\Http\Response
+     * @param TeamManager $teamManager
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(CreateOrUpdateTeamRequest $request, Team $team)
+    public function store(CreateOrUpdateTeamRequest $request, Team $team, TeamManager $teamManager)
     {
-        $team->fill($request->except(['_token']));
-        $team->save();
-
-
-        if ($request->has('users')) {
-            $ids   = array_keys($request->input('users'));
-            $users = User::whereIn('id', $ids)->get();
-            $users->each(function (User $user) use ($team) {
-                $user->inviteTo($team);
-            });
-        }
-
+        $teamManager->createTeam(team, $request->input());
         return redirect()->action('Resources\TeamController@index');
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Team $team
-     * @return \Illuminate\Http\Response
+     * @param Team $team
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function show(Team $team)
     {
@@ -105,10 +79,8 @@ class TeamController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Team $team
-     * @return \Illuminate\Http\Response
+     * @param Team $team
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function edit(Team $team)
     {
@@ -118,80 +90,25 @@ class TeamController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @param  \App\Models\Team $team
-     * @return \Illuminate\Http\Response
+     * @param CreateOrUpdateTeamRequest $request
+     * @param Team $team
+     * @param TeamManager $teamManager
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(CreateOrUpdateTeamRequest $request, Team $team)
+    public function update(CreateOrUpdateTeamRequest $request, Team $team, TeamManager $teamManager)
     {
-        $team->fill(
-            $request->except(['_method', '_token'])
-        );
-
-        $team->save();
-
-        if ($request->has('users')) {
-            $ids   = array_keys($request->input('users'));
-            $users = User::whereIn('id', $ids)->get();
-            $users->each(function (User $user) use ($team) {
-                $user->inviteTo($team);
-            });
-        }
-
+        $teamManager->updateTeam($team, $request->input());
         return redirect()->action('Resources\TeamController@index')->with('success', _('Users have been invited'));
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Team $team
-     * @return \Illuminate\Http\Response
+     * @param Team $team
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception
      */
     public function destroy(Team $team)
     {
         $team->delete();
         return redirect(action('Resources\TeamController@index'))->with('success', _i('Team removed'));
-    }
-
-    /**
-     * @param Team $team
-     * @return mixed
-     */
-    public function accept(Team $team)
-    {
-        $user = Auth::user();
-
-        $team->users()->attach($user->id);
-
-        $invite = $user->getInviteToTeam($team->id);
-
-        if (!$invite) {
-            abort(403);
-        }
-
-        $invite->accept();
-
-        return redirect()->back()->with('success', _i('Now You are a part of this team'));
-    }
-
-    /**
-     * @param Team $team
-     * @return mixed
-     */
-    public function decline(Team $team)
-    {
-        $user = Auth::user();
-
-        $invite = $user->getInviteToTeam($team->id);
-
-        if (!$invite) {
-            abort(403);
-        }
-
-        $invite->decline();
-
-        return redirect()->back()->with('info', _i('Invitation has been declined'));
     }
 }

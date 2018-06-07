@@ -244,4 +244,39 @@ class UserController extends Controller
         return redirect()->action('Resources\ProjectController@show', $project)->with($message_key, $message);
     }
 
+    /**
+     * @param Team $team
+     * @return mixed
+     */
+    public function acceptTeamInvite(Team $team)
+    {
+        $user = Auth::user();
+        $team->users()->attach($user->id);
+        $invite = $user->getInviteToTeam($team->id);
+        if (!$invite) {
+            abort(403);
+        }
+        $invite->accept();
+        return redirect()->back()->with('success', _i('Now You are a part of this team'));
+    }
+
+    /**
+     * @param Team $team
+     * @return mixed
+     */
+    public function declineTeamInvite(Team $team)
+    {
+        $user = Auth::user();
+
+        $invite = $user->getInviteToTeam($team->id);
+
+        if (!$invite) {
+            abort(403);
+        }
+
+        $invite->decline();
+
+        return redirect()->back()->with('info', _i('Invitation has been declined'));
+    }
+
 }

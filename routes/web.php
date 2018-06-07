@@ -162,8 +162,8 @@ Route::middleware(['auth'])->group(function () {
         });
 
         Route::prefix('teams')->group(function () {
-            Route::get('accept/{team}', 'TeamController@accept');
-            Route::get('decline/{team}', 'TeamController@decline');
+            Route::get('accept/{team}', 'UserController@acceptTeamInvite');
+            Route::get('decline/{team}', 'UserController@declineTeamInvite');
         });
 
         Route::prefix('messages')->group(function () {
