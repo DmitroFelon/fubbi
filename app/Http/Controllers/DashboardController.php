@@ -105,15 +105,16 @@ class DashboardController extends Controller
      */
     private function client()
     {
-        $user = Auth::user();
-
-        if ($user->projects()->count() == 1) {
-            return redirect()->action('Resources\ProjectController@show', $user->projects()->first());
-        } elseif ($user->projects()->count() > 1) {
-            return redirect()->action('Resources\ProjectController@index');
-        } else {
-            return redirect()->action('Resources\InspirationController@index');
-        }
+        return redirect()->action('Resources\InspirationController@index');
+        // $user = Auth::user();
+        //
+        // if ($user->projects()->count() == 1) {
+        //     return redirect()->action('Resources\ProjectController@show', $user->projects()->first());
+        // } elseif ($user->projects()->count() > 1) {
+        //     return redirect()->action('Resources\ProjectController@index');
+        // } else {
+        //     return redirect()->action('Resources\InspirationController@index');
+        // }
     }
 
     /**
@@ -143,6 +144,7 @@ class DashboardController extends Controller
         });
 
         $search_suggestions = SearchSuggestions::toView(Role::CLIENT);
+        $search_suggestions = '["' . implode('", "', $search_suggestions) . '"]';
 
         $date_from = ($request->has('date_from'))
             ? $request->input('date_from')
