@@ -135,31 +135,29 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('project')->group(
             function () {
                 Route::group(['middleware' => ['role:admin|account_manager']], function () {
-                    Route::get('accept_review/{project}', "ProjectController@accept_review");
-                    Route::get('reject_review/{project}', "ProjectController@reject_review");
+                    Route::get('accept_review/{project}', "ProjectController@acceptReview");
+                    Route::get('reject_review/{project}', "ProjectController@rejectReview");
                 });
-                Route::get('apply_to_project/{project}', "ProjectController@apply_to_project");
-                Route::get('apply_to_project/{project}', "ProjectController@apply_to_project");
+                Route::get('apply_to_project/{project}', "UserController@apply_to_project");
 
 
-                Route::get('decline_project/{project}', "ProjectController@decline_project");
+                Route::get('decline_project/{project}', "UserController@decline_project");
             }
         );
 
 
         Route::prefix('projects')->group(function () {
-            Route::post('{project}/prefill', 'ProjectController@prefill');
-            Route::put('{project}/prefill', 'ProjectController@prefill');
+            Route::match(['post', 'put'], '{project}/prefill', 'ProjectController@prefill');
             Route::post('{project}/prefill_files', 'ProjectController@prefill_files');
             Route::get('{project}/get_stored_files', 'ProjectController@get_stored_files');
             Route::get('{project}/remove_stored_file/{media}', 'ProjectController@remove_stored_files');
             Route::get('{project}/export', 'ProjectController@export');
             Route::get('{project}/resume', 'ProjectController@resume');
-            Route::post('{project}/invite_users', 'ProjectController@invite_users');
-            Route::post('{project}/invite_team', 'ProjectController@invite_team');
+            Route::post('{project}/invite_users', 'ProjectController@attachUsers');
+            Route::post('{project}/invite_team', 'ProjectController@attachTeam');
 
-            Route::get('{project}/remove_from_project/{user}', 'ProjectController@remove_from_project');
-            Route::get('{project}/remove_team_from_project/{team}', 'ProjectController@remove_team_from_project');
+            Route::get('{project}/remove_from_project/{user}', 'ProjectController@detachUser');
+            Route::get('{project}/remove_team_from_project/{team}', 'ProjectController@detachTeam');
             Route::get('{project}/allow_modifications', 'ProjectController@allow_modifications');
         });
 

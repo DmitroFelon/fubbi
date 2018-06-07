@@ -7,7 +7,7 @@ use App\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Support\Facades\Auth;
 
-//TODO implement account create/update policy
+//  TODO implement account create/update policy
 /**
  * Class UserPolicy
  * @package App\Policies
@@ -113,11 +113,18 @@ class UserPolicy
     public function create(User $user)
     {
         $allow = [
-            Role::ADMIN
+            Role::ADMIN,
+            Role::ACCOUNT_MANAGER
         ];
 
         return in_array($user->role, $allow);
 
     }
 
+    public function apply_to_project(User $user, Project $model)
+    {
+        $invite = $user->getInviteToProject($model->id);
+
+        return ($invite) ? true : false;
+    }
 }

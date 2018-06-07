@@ -14,6 +14,7 @@ use App\Models\Project;
 use App\Services\User\SearchSuggestions as UserSearchSuggestions;
 use App\Services\Project\SearchSuggestions as ProjectSearchSuggestions;
 use App\Models\Role;
+use App\Models\Idea;
 
 /**
  * Class ProjectRepository
@@ -151,5 +152,33 @@ class ProjectRepository
 
         ];
         return $filters;
+    }
+
+    /**
+     * @param Project $project
+     * @return mixed
+     */
+    public function collectProjectData(Project $project)
+    {
+        $projectData['ideasQuantity']  = Idea::where('project_id', $project->id)->count();
+        $projectData['ideasCompleted'] = Idea::where([
+            ['project_id', $project->id],
+            ['completed', 1]
+        ])->count();
+        $projectData['themes']         = $project->ideas()->themes()->get();
+        $projectData['themes']->each(function($theme) {
+            if(strlen($theme->theme) > 35){
+                $theme->theme = substr($theme->theme, 0, 35) . '...';
+            }
+        });
+        $projectData['questions']      = $project->ideas()->questions()->get();
+        $projectData['questions']->each(function($question) {
+            if(strlen($question->theme) > 35){
+                $question->theme = substr($question->theme, 0, 35) . '...';
+            }
+        });
+        $projectData['inspirations']   = $project->client->inspirations;
+        $projectData['metadata']       = $project->metaToView();
+        return $projectData;
     }
 }

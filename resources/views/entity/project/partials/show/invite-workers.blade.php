@@ -1,4 +1,4 @@
-{{Form::open([ 'method' => 'POST', 'action' => ['Resources\ProjectController@invite_users', $project ] ])}}
+{{Form::open([ 'method' => 'POST', 'action' => ['Resources\ProjectController@attachUsers', $project ] ])}}
 
 <div class="row">
     @foreach($users as $id => $name)

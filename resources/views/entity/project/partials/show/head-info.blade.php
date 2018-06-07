@@ -55,7 +55,7 @@
                         </a>
                         @role([\App\Models\Role::ADMIN])
                         <a class="text-danger" title="Remove from project"
-                           href="{{action('Resources\ProjectController@remove_from_project', [$project, $worker])}}">
+                           href="{{action('Resources\ProjectController@detachUser', [$project, $worker])}}">
                             <i class="fa fa-times"></i>
                         </a>
                         @endrole
@@ -73,7 +73,7 @@
                         </a>
                         @role([\App\Models\Role::ADMIN])
                         <a class="text-danger" title="Remove from project"
-                           href="{{action('Resources\ProjectController@remove_team_from_project', [$project, $team])}}">
+                           href="{{action('Resources\ProjectController@detachTeam', [$project, $team])}}">
                             <i class="fa fa-times"></i>
                         </a>
                         @endrole

@@ -46,10 +46,9 @@ class AuthServiceProvider extends ServiceProvider
          * */
         $gate->define('project.update', ProjectPolicy::class . '@update');
         $gate->define('project.create', ProjectPolicy::class . '@create');
-        $gate->define('project.accept-review', ProjectPolicy::class . '@accept_review');
-        $gate->define('project.invite', ProjectPolicy::class . '@invite_users');
+        $gate->define('project.accept-review', ProjectPolicy::class . '@acceptReview');
+        $gate->define('project.invite', ProjectPolicy::class . '@attachUsers');
         $gate->define('project.show', ProjectPolicy::class . '@show');
-        $gate->define('project.apply_to_project', ProjectPolicy::class . '@apply_to_project');
         $gate->define('project.export', ProjectPolicy::class . '@export');
 
         /*
@@ -65,6 +64,7 @@ class AuthServiceProvider extends ServiceProvider
          * User Policy
          * */
         $gate->define('user.show', UserPolicy::class . '@show');
+        $gate->define('user.apply_to_project', UserPolicy::class . '@apply_to_project');
 
 
     }
