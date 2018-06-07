@@ -22,7 +22,7 @@
 @section('before-content')
     <div class="row wrapper border-bottom white-bg page-heading">
         <div class="col-sm-4">
-            <h2>{{_i('plans')}}</h2>
+            <h2>{{_i('Plan')}}</h2>
         </div>
     </div>
 
@@ -31,13 +31,13 @@
 @section('content')
     <div class="ibox">
         <div class="ibox-title">
-            <h5>{{ucfirst($plan->name)}}</h5>
+            <h5>{{ucfirst($plan['nickname'])}}</h5>
         </div>
         <div class="ibox-content">
             <div class="project-list">
-                {!! Form::open(['action' => ['Resources\PlanController@update', $plan->id], 'method' => 'put']) !!}
+                {!! Form::open(['action' => ['Resources\PlanController@update', $plan['id']], 'method' => 'put']) !!}
                 <div id="start" class="row">
-                    @foreach ($plan->meta->split(2) as $chunk)
+                    @foreach ($plan['meta']->split(2) as $chunk)
                         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                             <table class="m-b-md">
                                 @foreach ($chunk as $key => $value)

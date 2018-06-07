@@ -3,12 +3,9 @@
 namespace App\Http\Controllers\Resources;
 
 use App\Http\Controllers\Controller;
-use App\Models\Project;
+use App\Services\Plan\PlanManager;
+use App\Services\Plan\PlanRepository;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
-use Laravel\Cashier\Subscription;
 use Stripe\Plan;
 
 /**
@@ -17,7 +14,6 @@ use Stripe\Plan;
  */
 class PlanController extends Controller
 {
-
     /**
      * PlanController constructor.
      */
@@ -29,118 +25,50 @@ class PlanController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @param PlanRepository $planRepository
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function index()
+    public function index(PlanRepository $planRepository)
     {
-
-        $data = [];
-
-        Cache::forget('public_plans');
-
-        $plans = Cache::remember(
-            'public_plans',
-            0,
-            function () {
-
-                $filtered_plans = Collection::make();
-
-                foreach (Plan::all()->data as $plan) {
-                    $filtered_plans->push($plan);
-                }
-
-                return $filtered_plans;
-            }
-        );
-
-        $plans->each(
-            function (Plan $plan, $i) {
-                $plan->meta     = $plan->metadata->jsonSerialize();
-                $plan->projects = Subscription::where('stripe_plan', $plan->id)->count();
-            }
-        );
-
-        $data['plans'] = $plans;
-
-        return view('entity.plan.index', $data);
+        $plans = $planRepository->plans();
+        return view('entity.plan.index', ['plans' => $plans]);
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
+     * @param $id
+     * @param PlanRepository $planRepository
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function show($id)
+    public function show($id, PlanRepository $planRepository)
     {
-        $data = [];
-
-        $plan = Plan::retrieve($id);
-
-        $plan->meta = collect($plan->metadata->jsonSerialize());
-
-        $plan->projects = Project::whereIn(
-            'subscription_id',
-            Subscription::select('id')->where('stripe_plan', $plan->id)->get()
-        )->get();
-
-        $data['plan'] = $plan;
-
-        return view('entity.plan.show', $data);
+        $plan = $planRepository->plan($id);
+        return view('entity.plan.show', ['plan' => $plan]);
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
+     * @param $id
+     * @param PlanRepository $planRepository
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function edit($id)
+    public function edit($id, PlanRepository $planRepository)
     {
-        $data = [];
-
-        $plan = Plan::retrieve($id);
-
-        $plan->meta = collect($plan->metadata->jsonSerialize());
-
-        $data['plan'] = $plan;
-
-        return view('entity.plan.edit', $data);
+        $plan = $planRepository->updatePlan($id);
+        return view('entity.plan.edit', ['plan' => $plan]);
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @param  int $id
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @param $id
+     * @param PlanManager $planManager
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id, PlanManager $planManager)
     {
-
-        $input = collect($request->except(['_token', '_method']));
-
-        $input->transform(
-            function ($item, $key) {
-                if ($item == 'true' or $item == false) {
-                    return ($item == 'true') ? true : false;
-                }
-
-                return $item;
-            }
-        );
-
-        $plan           = Plan::retrieve($id);
-        $plan->metadata = $input->toArray();
         try {
-            $plan->save();
+            $planManager->update(Plan::retrieve($id), collect($request->except(['_token', '_method'])));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'You have to add metadata to plan!');
         }
-
-        return redirect()->action('Resources\PlanController@show', $id)->with('success', 'Plan has been modified succesfully');
+        return redirect()->action('Resources\PlanController@show', $id)->with('success', 'Plan has been modified successfully');
     }
-
 }

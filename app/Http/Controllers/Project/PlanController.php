@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Project;
 
 use App\Http\Controllers\Controller;
 use App\Models\Project;
+use App\Services\Plan\PlanManager;
 use Illuminate\Http\Request;
 
 /**
- * Adds modigicators to project's plan services
+ * Adds modifiers to project's plan services
  *
  * Class PlanController
  *
@@ -16,9 +17,8 @@ use Illuminate\Http\Request;
 class PlanController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @param Project $project
+     * @return mixed
      */
     public function index(Project $project)
     {
@@ -36,34 +36,26 @@ class PlanController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param \App\Models\Project $project
-     * @return \Illuminate\Http\Response
+     * @param Project $project
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function edit(Project $project)
     {
         $plan_id = $project->subscription->stripe_plan;
-
         $services = $project->services;
-
         return view('entity.plan.project.edit', compact('plan_id', 'services', 'project'));
     }
 
     /**
      * @param Project $project
      * @param Request $request
+     * @param PlanManager $planManager
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Project $project, Request $request)
+    public function update(Project $project, Request $request, PlanManager $planManager)
     {
         try {
-            collect($request->input())->each(function ($item, $key) use ($project) {
-                    $service = $project->services()->whereName($key)->first();
-                    if ($service) {
-                        $service->customize(strval($item));
-                    }
-            });
+            $planManager->updateProjectPlan($request->input(), $project);
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

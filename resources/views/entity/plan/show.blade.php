@@ -5,16 +5,16 @@
 
     <div class="ibox">
         <div class="ibox-title">
-            <h5>{{ucfirst($plan->name)}}</h5>
+            <h5>{{ucfirst($plan['nickname'])}}</h5>
             <div class="ibox-tools">
-                <a href="{{url()->action('Resources\PlanController@edit', $plan->id)}}"
+                <a href="{{url()->action('Resources\PlanController@edit', $plan['id'])}}"
                    class="btn btn-primary btn-xs">{{_i('Edit plan')}}</a>
             </div>
         </div>
         <div class="ibox-content">
             <div class="">
                 <div class="row">
-                    @foreach ($plan->meta->split(2) as $chunk)
+                    @foreach ($plan['meta']->split(2) as $chunk)
                         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                             <table class="m-b-md">
                                 @foreach ($chunk as $key => $value)
@@ -41,7 +41,7 @@
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                         <h5>{{_i('Projects with this plan')}}</h5>
                         <ul>
-                            @foreach($plan->projects as $project)
+                            @foreach($plan['projects'] as $project)
                                 <li>
                                     <a target="_blank" href="{{url()->action('Resources\ProjectController@show', $project)}}">
                                         {{$project->name}}
