@@ -124,7 +124,7 @@ class ProjectPolicy
      * @param Project $model
      * @return bool
      */
-    public function accept_review(User $user, Project $model)
+    public function acceptReview(User $user, Project $model)
     {
         $skip = [
             Role::ADMIN
@@ -141,15 +141,10 @@ class ProjectPolicy
         }
     }
 
-    public function invite_users(User $user, Project $model)
+    public function attachUsers(User $user, Project $model)
     {
-        return $this->accept_review($user, $model);
+        return $this->acceptReview($user, $model);
     }
 
-    public function apply_to_project(User $user, Project $model)
-    {
-        $invite = $user->getInviteToProject($model->id);
 
-        return ($invite) ? true : false;
-    }
 }

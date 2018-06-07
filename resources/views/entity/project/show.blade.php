@@ -59,7 +59,7 @@
 
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
             @component('components.ibox')
-            @slot('title') Ideas ({{ $ideasCompleted . '/' . $ideasQuantity }} completed) @endslot
+            @slot('title') Ideas ({{ $projectData['ideasCompleted'] . '/' . $projectData['ideasQuantity'] }} completed) @endslot
             @slot('tools')
 
             <a class="collapse-link">
@@ -71,21 +71,15 @@
                     <h3>{{_('Themes')}}</h3>
 
                     <ul>
-                        @if($project->ideas()->themes()->get()->isEmpty())
+                        @if($projectData['themes']->isEmpty())
                             <div class="text-muted">
                                 {{_i('Empty')}}
                             </div>
                         @endif
-                        @foreach($project->ideas()->themes()->get() as $idea)
-                                @php
-                                    $theme = $idea->theme;
-                                    if(strlen($idea->theme) > 35){
-                                        $theme = substr($idea->theme, 0, 30) . '...';
-                                    }
-                                @endphp
+                        @foreach($projectData['themes'] as $theme)
                                 <li>
-                                <a target="_blank" href="{{action('IdeaController@show', $idea)}}" style="{{ $idea->completed ? '' : 'color:red'}}">
-                                    {{ $theme }}
+                                <a target="_blank" href="{{action('IdeaController@show', $theme)}}" style="{{ $theme->completed ? '' : 'color:red'}}">
+                                    {{ $theme->theme }}
                                 </a>
                             </li>
                         @endforeach
@@ -95,21 +89,15 @@
                 <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                     <h3>{{_('Questions')}}</h3>
                     <ul>
-                        @if($project->ideas()->questions()->get()->isEmpty())
+                        @if($projectData['questions']->isEmpty())
                             <div class="text-muted">
                                 {{_i('Empty')}}
                             </div>
                         @endif
-                        @foreach($project->ideas()->questions()->get() as $idea)
-                                @php
-                                    $theme = $idea->theme;
-                                    if(strlen($idea->theme) > 35){
-                                        $theme = substr($idea->theme, 0, 30) . '...';
-                                    }
-                                @endphp
+                        @foreach($projectData['questions'] as $question)
                                 <li>
-                                <a target="_blank" href="{{action('IdeaController@show', $idea)}}" style="{{ $idea->completed ? '' : 'color:red'}}">
-                                    {{ $theme }}
+                                <a target="_blank" href="{{action('IdeaController@show', $question)}}" style="{{ $question->completed ? '' : 'color:red'}}">
+                                    {{ $question->theme }}
                                 </a>
                             </li>
                         @endforeach
@@ -118,12 +106,12 @@
                 <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                     <h3>{{_('Ideas') }}</h3>
                     <ul>
-                        @if($project->client->inspirations->isEmpty())
+                        @if($projectData['inspirations']->isEmpty())
                             <div class="text-muted">
                                 {{_i('Empty')}}
                             </div>
                         @endif
-                        @foreach($project->client->inspirations as $inspiration)
+                        @foreach($projectData['inspirations'] as $inspiration)
                             <li>
                                 <a target="_blank"
                                    href="{{action('Resources\InspirationController@show', $inspiration)}}">

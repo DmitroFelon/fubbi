@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Resources;
 use App\Http\Controllers\Controller;
 use App\Models\Helpers\ProjectStates;
 use App\Models\Team;
+use App\Models\Project;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -38,6 +39,7 @@ class UserController extends Controller
         //$this->middleware('can:show')->only(['show']);
         //c$this->middleware('can:create,user')->only(['create', 'store']);
         $this->middleware('can:update,user')->only(['edit', 'update']);
+        $this->middleware('can:user.apply_to_project,')->only(['apply_to_project']);
         $this->user = $user;
     }
 
@@ -202,4 +204,44 @@ class UserController extends Controller
         return redirect()->back()->with('error', $user->name . ' has been blocked');
 
     }
+
+    /**
+     * @param Project $project
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function decline_project(Project $project, Request $request)
+    {
+        $invite = $request->user()->getInviteToProject($project->id);
+        if (!$invite) {
+            return redirect()->back()->with('error', "You can't perform this action");
+        }
+        $invite->decline();
+        return redirect()->action('Resources\ProjectController@show', [$project])->with('info', _i('You are declined this project'));
+    }
+
+    /**
+     * @param Project $project
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function apply_to_project(Project $project, Request $request)
+    {
+        $message_key = 'info';
+        $user        = $request->user();
+        if ($project->hasWorker($user->role) or $project->teams->isNotEmpty()) {
+            $message_key = 'error';
+            $message     = _i('You are too late. This project already has %s', [$user->role]);
+        } else {
+            $project->attachWorker($user->id);
+            $invite = $user->getInviteToProject($project->id);
+            if (!$invite) {
+                return redirect()->back()->with('error', "You can't perform this action");
+            }
+            $invite->accept();
+            $message = _i('You are applied to this project');
+        }
+        return redirect()->action('Resources\ProjectController@show', $project)->with($message_key, $message);
+    }
+
 }

@@ -1,5 +1,5 @@
 <ul>
-    @foreach($metadata as $meta)
+    @foreach($projectData['metadata'] as $meta)
         @if($meta->value == '' or empty($meta->value) or is_object($meta->value)) @continue @endif
         <li>
             <strong>{{ title_case( str_replace('_', ' ', $meta->key)) }} : </strong>

@@ -7,11 +7,11 @@
 
 @can('project.accept-review', $project)
     @if($project->isOnReview())
-        <a href="{{ action('Resources\ProjectController@accept_review', $project) }}"
+        <a href="{{ action('Resources\ProjectController@acceptReview', $project) }}"
            class="btn btn-primary btn-xs btn-xs m-r-sm p-w-sm">
             {{_i('Accept review')}}
         </a>
-        <a href="{{action('Resources\ProjectController@reject_review', $project)}}"
+        <a href="{{action('Resources\ProjectController@rejectReview', $project)}}"
            class="btn btn-danger btn-xs btn-xs m-r-sm p-w-sm">
             {{_i('Reject review')}}
         </a>

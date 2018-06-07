@@ -1,4 +1,4 @@
-{{Form::open([ 'method' => 'POST', 'action' => ['Resources\ProjectController@invite_team', $project ] ])}}
+{{Form::open([ 'method' => 'POST', 'action' => ['Resources\ProjectController@attachTeam', $project ] ])}}
 
 <div class="row">
     @foreach($teams as $team)

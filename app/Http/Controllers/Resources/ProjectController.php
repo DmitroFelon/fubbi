@@ -9,18 +9,13 @@ use App\Models\Idea;
 use App\Models\Project;
 use App\Models\Role;
 use App\Models\Team;
-use App\Services\User\SearchSuggestions as UserSearchSuggestions;
-use App\Services\Project\SearchSuggestions as ProjectSearchSuggestions;
+use App\Services\Idea\IdeaRepository;
+use App\Services\Project\ProjectManager;
+use App\Services\Project\ProjectRepository;
 use App\User;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\Session;
 use Spatie\MediaLibrary\Media;
-use Stripe\Plan;
 
 /**
  * Class ProjectController
@@ -29,7 +24,6 @@ use Stripe\Plan;
  */
 class ProjectController extends Controller
 {
-
     /**
      * @var Project
      */
@@ -37,12 +31,11 @@ class ProjectController extends Controller
 
     /**
      * ProjectController constructor.
-     *
+     * @param Project $project
      */
     public function __construct(Project $project)
     {
         $this->project = $project;
-
         $this->middleware('can:index,' . Project::class)->only(['index']);
         $this->middleware('can:project.show,project')->only([
             'show',
@@ -53,89 +46,27 @@ class ProjectController extends Controller
         $this->middleware('can:create,' . Project::class)->only(['create', 'store']);
         $this->middleware('can:update,project')->only(['edit', 'update']);
         $this->middleware('can:delete,project')->only(['delete', 'destroy', 'resume']);
-        $this->middleware('can:project.accept-review,project')->only(['accept_review', 'reject_review']);
-        $this->middleware('can:project.invite,project')->only(['invite_users', 'invite_team']);
-        $this->middleware('can:project.apply_to_project,project')->only(['apply_to_project']);
+        $this->middleware('can:project.accept-review,project')->only(['acceptReview', 'rejectReview']);
+        $this->middleware('can:project.invite,project')->only(['attachUsers', 'attachTeam']);
     }
-
 
     /**
      * @param Request $request
+     * @param ProjectRepository $projectRepository
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\RedirectResponse|\Illuminate\View\View
      */
-    public function index(Request $request)
-        {
-            $user = Auth::user();
-            if ($user->projects->count() == 1) {
-                return redirect()->action('Resources\ProjectController@show', $user->projects->first());
-            }
-            switch ($user->role) {
-                case \App\Models\Role::ADMIN:
-                    $projects = $this->project->query();
-                    if ($request->has('search') and $request->input('search') != '') {
-                        $search = $request->input('search');
-                        $clients = User::search($search)->get();
-                        if (!$clients->isEmpty()) {
-                            $in = [];
-                            foreach ($clients as $client) {
-                                array_push($in, $client->id);
-                            }
-                            $projects = $projects->where(function($query) use($in, $search) {
-                                $query->whereIn('client_id', $in)->orWhere('name', 'like', '%' . $search . '%');
-                            });
-                        }
-                        else {
-                            $projects = $projects->where('name', 'like', '%' . $request->input('search') . '%');
-                        }
-                    }
-                    if ($request->has('status') and $request->get('status')) {
-                        if ($request->get('status') == 'active') {
-                            $projects = $projects->whereHas('subscription', function ($query) {
-                                $query->whereNotNull('ends_at');
-                            });
-                        } else {
-                            $projects = $projects->whereHas('subscription', function ($query) {
-                                $query->whereNull('ends_at');
-                            });
-                        }
-                    }
-                    if ($request->has('month') and $request->get('month')) {
-                        $projects = $projects->where('created_at', '>=', Carbon::now()->subMonth($request->get('month')));
-                    }
-                    $projects = $projects->paginate(10);
-                    break;
-                case \App\Models\Role::CLIENT:
-                    $projects = $user->projects()->paginate(10);
-                    if ($projects->isEmpty()) {
-                        return redirect()->action('Resources\InspirationController@index');
-                    }
-                    break;
-                default:
-                    //if user accepted to the project personally
-                    $projects = $user->projects()->get();
-                    $projects = $user->teamProjects()->merge($projects);
-                    break;
-            }
-            $filters = [];
-            $filters['months'] = [
-                ''   => _('All time'),
-                '1'  => _('1 month'),
-                '3'  => _('3 months'),
-                '6'  => _('6 months'),
-                '12' => _('12 months'),
-            ];
-            $filters['status'] = [
-                ''         => _i('Any status'),
-                'active'   => _i('Active'),
-                'deactive' => _i('Inactive'),
-
-            ];
-            $projectSuggestions = ProjectSearchSuggestions::toView();
-            $userSuggestions = UserSearchSuggestions::toView(Role::CLIENT);
-            $searchSuggestions = '["' . implode('", "', $userSuggestions) . '", "' . implode('", "', $projectSuggestions) . '"]';
-            return view('entity.project.index', compact('projects', 'filters', 'searchSuggestions'));
+    public function index(Request $request, ProjectRepository $projectRepository)
+    {
+        $user = Auth::user();
+        if ($user->projects->count() == 1) {
+            return redirect()->action('Resources\ProjectController@show', $user->projects->first());
         }
-
+        $data =$projectRepository->projects($user, $request->input());
+        $projects = $data['projects'];
+        $filters = $data['filters'];
+        $searchSuggestions = $data['searchSuggestions'];
+        return view('entity.project.index', compact('projects', 'filters', 'searchSuggestions'));
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -144,7 +75,7 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        if (Session::has('quiz')) {
+/*        if (Session::has('quiz')) {
             return redirect()
                 ->action('Resources\ProjectController@edit', [Session::get('quiz'), 's' => ProjectStates::QUIZ_FILLING])
                 ->with('info', _i('Please, complete the quiz'));
@@ -171,82 +102,60 @@ class ProjectController extends Controller
         header("Pragma: no-cache");
         header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
 
-        return view('entity.project.create', compact('plans', 'step'));
+        return view('entity.project.create', compact('plans', 'step'));*/
+        return back()->with('error', _i("Can't create the project. Something goes wrong with Stripe api."));
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param \App\Models\Project $project
-     * @return \Illuminate\Http\Response
+     * @param Project $project
+     * @param ProjectRepository $projectRepository
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function show(Project $project)
+    public function show(Project $project, ProjectRepository $projectRepository)
     {
-        $metadata           = $project->metaToView();
-        $manager            = $project->workers()->withRole(Role::ACCOUNT_MANAGER)->first(['id']);
-        $manager_id         = ($manager) ? $manager->id : null;
-
-        $users = [];
-        $teams = [];
-
-        $ideasQuantity = Idea::where('project_id', $project->id)->count();
-        $ideasCompleted = Idea::where([
-            ['project_id', $project->id],
-            ['completed', 1]
-        ])->count();
-
+        $manager    = $project->workers()->withRole(Role::ACCOUNT_MANAGER)->first();
+        $manager_id = ($manager) ? $manager->id : null;
         if (Auth::user()->role == 'admin' or ($manager_id and $manager_id == Auth::user()->id)) {
             //get users which are not attached to this project
-
             $users = $project->getAvailableWorkers();
             $teams = Team::all();
         }
-
-        return view('entity.project.show', compact('project', 'metadata', 'users', 'teams', 'ideasQuantity', 'ideasCompleted'));
+        $projectData = $projectRepository->collectProjectData($project);
+        return view('entity.project.show', compact('project', 'users', 'teams', 'projectData'));
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param \App\Models\Project $project
-     * @return \Illuminate\Http\Response
+     * @param Project $project
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\RedirectResponse|\Illuminate\View\View
      */
     public function edit(Project $project, Request $request)
     {
         if (!$request->has('s')) {
             return redirect()->action('Resources\ProjectController@edit', [$project, 's' => $project->state]);
         }
-
         $step = $project->state;
-
-
         $articles = ($step == ProjectStates::QUIZ_FILLING)
             ? $project->articles
             : collect();
-
         return view('entity.project.edit', compact('articles', 'project', 'step'));
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param \App\Http\Requests\StoreProject|\Illuminate\Http\Request $request
-     * @param \App\Models\Project $project
-     * @return \Illuminate\Http\Response
+     * @param StoreProject $request
+     * @param Project $project
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(StoreProject $request, Project $project)
     {
         if (!$request->has('_step')) {
             abort(404);
         }
-
         $project = $project->filling($request);
-
         if ($project->state == ProjectStates::MANAGER_REVIEW) {
             return redirect()->action('Resources\ProjectController@show', $project)
                              ->with('success', _i('Thank You, our team is working on your content'));
         }
-
         return redirect()->action('Resources\ProjectController@edit', [$project, 's' => $project->state]);
     }
 
@@ -258,18 +167,16 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
-
-        /* try {
+/*        try {
              $client = $project->client;
              if ($client->subscription($project->name)) {
                  $client->subscription($project->name)->cancel();
              }
-         } catch (InvalidRequest $e) {
+        } catch (InvalidRequest $e) {
              $project->forceDelete();
-         }*/
+        }
+        return redirect()->action('Resources\ProjectController@index');*/
         return back()->with('error', _i("Can't delete the project. Something goes wrong with Stripe api."));
-
-        // return redirect()->action('Resources\ProjectController@index');
     }
 
     /**
@@ -279,233 +186,124 @@ class ProjectController extends Controller
     public function resume(Project $project)
     {
         $client = $project->client;
-
         if ($client->subscription($project->name)) {
             $client->subscription($project->name)->resume();
         }
-
         return redirect()->action('Resources\ProjectController@index');
     }
 
     /**
-     * Accept project and start working
-     *
      * @param Project $project
+     * @param ProjectManager $projectManager
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function accept_review(Project $project)
+    public function acceptReview(Project $project, ProjectManager $projectManager)
     {
-        $project->setState(\App\Models\Helpers\ProjectStates::ACCEPTED_BY_MANAGER);
-
+        $projectManager->setState($project, ProjectStates::ACCEPTED_BY_MANAGER);
         return redirect()->action('Resources\ProjectController@show', [$project]);
     }
 
     /**
-     * Reject project
-     *
-     *
      * @param Project $project
+     * @param ProjectManager $projectManager
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function reject_review(Project $project)
+    public function rejectReview(Project $project, ProjectManager $projectManager)
     {
-        $project->setState(\App\Models\Helpers\ProjectStates::REJECTED_BY_MANAGER);
-
+        $projectManager->setState($project, ProjectStates::REJECTED_BY_MANAGER);
         return redirect()->action('Resources\ProjectController@show', [$project]);
     }
 
     /**
-     * Attach worker to the project
-     *
-     *
      * @param Project $project
+     * @param User $user
+     * @param ProjectManager $projectManager
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function apply_to_project(Project $project, Request $request)
+    public function detachUser(Project $project, User $user, ProjectManager $projectManager)
     {
-        $message_key = 'info';
-        $user        = $request->user();
-
-        if ($project->hasWorker($user->role) or $project->teams->isNotEmpty()) {
-            $message_key = 'error';
-            $message     = _i('You are too late. This project already has %s', [$user->role]);
-        } else {
-            $project->attachWorker($user->id);
-            $invite = $user->getInviteToProject($project->id);
-            if (!$invite) {
-                return redirect()->back()->with('error', "You can't perform this action");
-            }
-            $invite->accept();
-            $message = _i('You are applied to this project');
-        }
-
-        return redirect()->action('Resources\ProjectController@show', $project)->with($message_key, $message);
-    }
-
-    /**
-     * Attach worker to the project
-     *
-     *
-     * @param Project $project
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function remove_from_project(Project $project, User $user)
-    {
-        $message_key = 'info';
-        try {
-            $project->detachWorker($user->id);
-            $message = _i("%s has been removed from project", [$user->name]);
-        } catch (\Exception $e) {
-            $message_key = 'error';
-            $message     = _i("%s is not attached to this project" . $e->getMessage(), [$user->name]);
-        }
-
-        return redirect()->back()->with($message_key, $message);
+        $data = $projectManager->detachUser($project, $user);
+        return redirect()->back()->with($data['message_key'], $data['message']);
     }
 
     /**
      * @param Project $project
      * @param Team $team
+     * @param ProjectManager $projectManager
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function remove_team_from_project(Project $project, Team $team)
+    public function detachTeam(Project $project, Team $team, ProjectManager $projectManager)
     {
-        $message_key = 'info';
-        try {
-            $project->detachTeam($team->id);
-            $message = _i("%s has been removed from project", [$team->name]);
-        } catch (\Exception $e) {
-            report($e);
-            $message_key = 'error';
-            $message     = _i("%s is not attached to this project", [$team->name]);
-        }
-
-        return redirect()->back()->with($message_key, $message);
-    }
-
-    /**
-     * Reject worker from the project
-     *
-     * @param Project $project
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function decline_project(Project $project, Request $request)
-    {
-        $message_key = 'info';
-        $message     = _i('You are declined this project');
-        $user        = $request->user();
-
-        $invite = $user->getInviteToProject($project->id);
-        if (!$invite) {
-            return redirect()->back()->with('error', "You can't perform this action");
-        }
-        $invite->decline();
-
-        return redirect()->action('Resources\ProjectController@show', [$project])->with($message_key, $message);
+        $data = $projectManager->detachTeam($project, $team);
+        return redirect()->back()->with($data['message_key'], $data['message']);
     }
 
     /**
      * @param Project $project
      * @param Request $request
+     * @param ProjectManager $projectManager
      * @return \Illuminate\Http\JsonResponse
      */
-    public function get_stored_files(Project $project, Request $request)
+    public function get_stored_files(Project $project, Request $request, ProjectManager $projectManager)
     {
         if (!$request->has('collection')) {
-            return Response::json('error', 400);
+            return response()->json('error', 400);
         }
-
-        $files = $project->getMedia($request->get('collection'));
-
-        $files->transform(function (Media $media) use ($project) {
-            $media->url = $project->prepareMediaConversion($media);
-            return $media;
-        });
-
-        return Response::json($files->filter()->toArray(), 200);
+        $files = $projectManager->storedFiles($project, $request->input());
+        return response()->json($files->filter()->toArray(), 200);
     }
 
     /**
      * @param Idea $idea
-     * @param Request $request
+     * @param IdeaRepository $ideaRepository
      * @return \Illuminate\Http\JsonResponse
      */
-    public function get_stored_idea_files(Idea $idea, Request $request)
+    public function get_stored_idea_files(Idea $idea, IdeaRepository $ideaRepository)
     {
-        $files = $idea->getMedia();
-
-        $files->transform(function (Media $media) use ($idea) {
-            $media->url = $idea->prepareMediaConversion($media);
-            return $media;
-        });
-
-        return Response::json($files->filter()->toArray(), 200);
+        $files = $ideaRepository->storedFiles($idea);
+        return response()->json($files->filter()->toArray(), 200);
     }
 
     /**
      * @param Project $project
-     * @param Request $request
+     * @param Media $media
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function remove_stored_files(Project $project, Media $media, Request $request)
+    public function remove_stored_files(Project $project, Media $media)
     {
         $project->media()->findOrFail($media->id)->delete();
-        return Response::json('success', 200);
+        return response()->json('success', 200);
     }
 
     /**
-     * Save not completed project
-     *
      * @param Project $project
      * @param Request $request
-     * @return array
+     * @return \Illuminate\Http\JsonResponse
      */
     public function prefill(Project $project, Request $request)
     {
         try {
             $project->prefill($request);
-            return Response::json(['success', 'error' => false], 200);
+            return response()->json(['success', 'error' => false], 200);
         } catch (\Exception $e) {
-            return Response::json(['error' => true, 'message' => $e->getMessage()], 400);
+            return response()->json(['error' => true, 'message' => $e->getMessage()], 400);
         }
     }
 
     /**
      * @param Project $project
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param ProjectManager $projectManager
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
      */
-    public function prefill_files(Project $project, Request $request)
+    public function prefill_files(Project $project, Request $request, ProjectManager $projectManager)
     {
-
-        $files = $project->addFiles($request);
-        $files->transform(function (Media $media) use ($project) {
-            $media->url = $project->prepareMediaConversion($media);
-            return $media;
-        });
-
-        return Response::json($files, 200);
-    }
-
-    /**
-     * @param Project $project
-     * @param Idea $idea
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \Exception
-     */
-    public function prefill_meta_files(Project $project, Idea $idea, Request $request)
-    {
-        $files = collect();
-
-        if ($request->hasFile('files')) {
-            foreach ($request->files as $file) {
-                $media      = $idea->addMedia($file)->toMediaCollection();
-                $media->url = $idea->prepareMediaConversion($media);
-                $files->push($media);
-            }
+        try{
+            $files = $projectManager->addFiles($project, $request->files);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
         }
-
-        return Response::json($files, 200);
+        return response()->json($files, 200);
     }
 
     /**
@@ -527,57 +325,39 @@ class ProjectController extends Controller
     /**
      * @param Project $project
      * @param Request $request
+     * @param ProjectManager $projectManager
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function invite_users(Project $project, Request $request)
+    public function attachUsers(Project $project, Request $request, ProjectManager $projectManager)
     {
         if ($request->has('users')) {
-            $project->attachWorkers(array_keys($request->input('users')));
-
-            $attached_users = User::whereIn('id', array_keys($request->input('users')))->get();
-
-            $attached_users_names = implode(', ', $attached_users->pluck('name')->toArray());
-
-            return redirect()->back()->with(
-                'info',
-                _i('Users: %s have been sucessfully attached to project: "%s"', [$attached_users_names, $project->name])
-            );
+            return $projectManager->attachUsers($project, $request->input());
         }
-
-
         return redirect()->back()->with('error', _i('Users were not specified'));
     }
 
     /**
      * @param Project $project
      * @param Request $request
+     * @param ProjectManager $projectManager
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function invite_team(Project $project, Request $request)
+    public function attachTeam(Project $project, Request $request, ProjectManager $projectManager)
     {
         if ($request->has('team')) {
-
-            $team = Team::findOrFail($request->input('team'));
-
-            $project->attachTeam($request->input('team'));
-
-            return redirect()->back()->with(
-                'info',
-                _i('Team: "%s" have been sucessfully attached to project: "%s"', [$team->name, $project->name])
-            );
+            return $projectManager->attachTeam($project, $request->input());
         }
-
         return redirect()->back()->with('error', _i('Team was not specified'));
     }
 
     /**
      * @param Project $project
      * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception
      */
     public function allow_modifications(Project $project)
     {
         $project->setState(ProjectStates::QUIZ_FILLING);
-
         return redirect()->back()->with('success', 'Project state set to "Quiz Filling"');
     }
 }
