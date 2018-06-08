@@ -91,7 +91,6 @@ class ThrivecartController extends Controller
     public function orderSuccess(Request $request, UserManager $userManager, SubscriptionManager $subscriptionManager)
     {
         $product_id = $request->input('base_product');
-
         if (!$product_id or !isset(config('fubbi.thrive_cart_plans')[$product_id])) {
             Log::error('wrong product_id: ' . $product_id);
             return new Response('Webhook Handled', 200);
@@ -125,60 +124,16 @@ class ThrivecartController extends Controller
                 try {
                     $userManager->userCreate($user, $customer);
                 } catch (\Exception $e) {
-
+                    Log::error($e);
                 }
-//                $tmp_password = str_random(8);
-//                $user         = User::create([
-//                    'email'          => $customer['email'] ?? '',
-//                    'first_name'     => $customer['first_name'] ?? '',
-//                    'last_name'      => $customer['last_name'] ?? '',
-//                    'password'       => Hash::make($tmp_password),
-//                    'phone'          => $customer['contactno'] ?? '',
-//                    'stripe_id'      => $stripe_subscription->customer,
-//                    'trial_ends_at'  => Carbon::createFromTimestamp($stripe_subscription->trial_end),
-//                    'card_brand'     => $customer_card->brand,
-//                    'card_last_four' => $customer_card->last4,
-//                ]);
-//                $user->tmp_password = $tmp_password;
-//                $user->save();
-//                $role = Role::where('name', Role::CLIENT)->first();
-//                $user->attachRole($role);
-//                $user->setMeta('address_line_1', $customer_card->address_line1);
-//                $user->setMeta('zip', $customer_card->address_zip);
-//                $user->setMeta('city', $customer_card->address_city);
-//                $user->setMeta('country', $customer_card->address_country);
-//                $user->setMeta('state', $customer['address']['state'] ?? '');
-//                $user->save();
             }
-
-//            $params['plan_id'] = $plan_id;
-//            $params['project_name'] = $customer['business_name'] ?? 'Project #' . strval($request->input('order_id'));
-//            $params['stripeToken'] = $customer_identifier;
-//            $subscriptionManager->subscriptionCreate($user, $this->project, $params, ProjectStates::QUIZ_FILLING);
-            $subscription              = $this->subscription;
-            $subscription->user_id     = $user->id;
-            $subscription->name        = $customer['business_name'] ?? 'Project #' . strval($request->input('order_id'));
-            $subscription->stripe_id   = $subscription_id;
-            $subscription->stripe_plan = $plan_id;
-            $subscription->quantity    = 1;
-
-            $subscription->save();
-
-            $project                  = $this->project;
-            $project->client_id       = $user->id;
-            $project->subscription_id = $subscription->id;
-            $project->name            = $customer['business_name'] ?? 'Project #' . strval($request->input('order_id'));
-            $project->state           = ProjectStates::QUIZ_FILLING;
-
-            $project->save();
-            $project->setServices($plan_id);
-            $project->setCycle($plan_id);
-
-
+            $params['plan_id'] = $plan_id;
+            $params['project_name'] = $customer['business_name'] ?? 'Project #' . strval($request->input('order_id'));
+            $params['stripeToken'] = $customer_identifier;
+            $subscriptionManager->subscriptionCreate($user, $this->project, $params, ProjectStates::QUIZ_FILLING);
         } catch (\Exception $e) {
             Log::error($e);
         }
-
         return new Response('Webhook Handled', 200);
     }
 
