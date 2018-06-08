@@ -96,17 +96,10 @@ class ThrivecartController extends Controller
             return new Response('Webhook Handled', 200);
         }
         try {
-            //stripe customer id
-//            $customer_identifier = $request->input('customer_identifier');
-            //form data
             $customer            = $request->input('customer');
-            //subscription ids, get first
-//            $subscription_id     = collect($request->input('subscriptions'))->first();
-//            $plan_id             = config('fubbi.thrive_cart_plans')[$product_id];
-//            $stripe_customer     = Customer::retrieve($customer_identifier);
+            $stripe_customer     = Customer::retrieve($request->input('customer_identifier'));
             $stripe_subscription = Subscription::retrieve(collect($request->input('subscriptions'))->first());
-//            $customer_card       = collect($stripe_customer->sources->data)->first();
-            $customer_card       = collect(Customer::retrieve($request->input('customer_identifier'))->sources->data)->first();
+            $customer_card       = collect($stripe_customer->sources->data)->first();
             $user                = User::whereEmail($customer['email'] ?? '')->first();
             if (!$user) {
                 $tmp_password = str_random(8);
@@ -125,13 +118,14 @@ class ThrivecartController extends Controller
                 try {
                     $userManager->userCreate($user, $customer);
                 } catch (\Exception $e) {
-                    Log::error($e);
+
                 }
             }
             $params['plan_id'] = config('fubbi.thrive_cart_plans')[$product_id];
             $params['project_name'] = $customer['business_name'] ?? 'Project #' . strval($request->input('order_id'));
             $params['stripeToken'] = $request->input('customer_identifier');
             $subscriptionManager->subscriptionCreate($user, $this->project, $params, ProjectStates::QUIZ_FILLING);
+
         } catch (\Exception $e) {
             Log::error($e);
         }
