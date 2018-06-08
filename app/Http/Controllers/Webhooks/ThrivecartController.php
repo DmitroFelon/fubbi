@@ -5,20 +5,16 @@ namespace App\Http\Controllers\Webhooks;
 use App\Http\Controllers\Controller;
 use App\Models\Helpers\ProjectStates;
 use App\Models\Project;
-use App\Models\Role;
 use App\Services\Subscription\SubscriptionManager;
+use App\Services\Thrivecart\ThrivacartManager;
 use App\Services\User\UserManager;
 use App\User;
-use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
-use Stripe\Customer;
-use Stripe\Subscription;
 
 /**
  * Class TrivecartController
@@ -88,7 +84,7 @@ class ThrivecartController extends Controller
      * @return Response
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function orderSuccess(Request $request, UserManager $userManager, SubscriptionManager $subscriptionManager)
+    public function orderSuccess(Request $request, UserManager $userManager, SubscriptionManager $subscriptionManager, ThrivacartManager $thrivacartManager)
     {
         $product_id = $request->input('base_product');
         if (!$product_id or !isset(config('fubbi.thrive_cart_plans')[$product_id])) {
@@ -96,36 +92,7 @@ class ThrivecartController extends Controller
             return new Response('Webhook Handled', 200);
         }
         try {
-            $customer            = $request->input('customer');
-            $stripe_customer     = Customer::retrieve($request->input('customer_identifier'));
-            $stripe_subscription = Subscription::retrieve(collect($request->input('subscriptions'))->first());
-            $customer_card       = collect($stripe_customer->sources->data)->first();
-            $user                = User::whereEmail($customer['email'] ?? '')->first();
-            if (!$user) {
-                $tmp_password = str_random(8);
-                $customer['password'] = Hash::make($tmp_password);
-                $customer['phone'] = $customer['contactno'] ?? '';
-                $customer['stripe_id'] = $stripe_subscription->customer;
-                $customer['trial_ends_at'] = Carbon::createFromTimestamp($stripe_subscription->trial_end);
-                $customer['card_brand'] = $customer_card->brand;
-                $customer['card_last_four'] = $customer_card->last4;
-                $customer['address_line_1'] = $customer_card->address_line1;
-                $customer['zip'] = $customer_card->address_zip;
-                $customer['city'] = $customer_card->address_city;
-                $customer['country'] = $customer_card->address_country;
-                $customer['state'] = $customer['address']['state'] ?? '';
-                $customer['role'] = Role::CLIENT;
-                try {
-                    $userManager->userCreate($user, $customer);
-                } catch (\Exception $e) {
-
-                }
-            }
-            $params['plan_id'] = config('fubbi.thrive_cart_plans')[$product_id];
-            $params['project_name'] = $customer['business_name'] ?? 'Project #' . strval($request->input('order_id'));
-            $params['stripeToken'] = $request->input('customer_identifier');
-            $subscriptionManager->subscriptionCreate($user, $this->project, $params, ProjectStates::QUIZ_FILLING);
-
+            $thrivacartManager->create($userManager, $subscriptionManager, $request->input(), $this->project);
         } catch (\Exception $e) {
             Log::error($e);
         }
