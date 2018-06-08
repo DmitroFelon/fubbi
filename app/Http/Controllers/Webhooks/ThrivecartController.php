@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Helpers\ProjectStates;
 use App\Models\Project;
 use App\Models\Role;
+use App\Services\Subscription\SubscriptionManager;
 use App\Services\User\UserManager;
 use App\User;
 use Carbon\Carbon;
@@ -87,7 +88,7 @@ class ThrivecartController extends Controller
      * @return Response
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function orderSuccess(Request $request, UserManager $userManager)
+    public function orderSuccess(Request $request, UserManager $userManager, SubscriptionManager $subscriptionManager)
     {
         $product_id = $request->input('base_product');
 
@@ -150,9 +151,13 @@ class ThrivecartController extends Controller
 //                $user->save();
             }
 
+//            $params['plan_id'] = $plan_id;
+//            $params['project_name'] = $customer['business_name'] ?? 'Project #' . strval($request->input('order_id'));
+//            $params['stripeToken'] = $customer_identifier;
+//            $subscriptionManager->subscriptionCreate($user, $this->project, $params, ProjectStates::QUIZ_FILLING);
             $subscription              = $this->subscription;
             $subscription->user_id     = $user->id;
-            $subscription->name        = $customer['business_name'] ?? str_random(10);
+            $subscription->name        = $customer['business_name'] ?? 'Project #' . strval($request->input('order_id'));
             $subscription->stripe_id   = $subscription_id;
             $subscription->stripe_plan = $plan_id;
             $subscription->quantity    = 1;

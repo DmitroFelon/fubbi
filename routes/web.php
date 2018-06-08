@@ -19,9 +19,9 @@ Route::namespace('Webhooks')->group(function () {
     //Stripe routes
     Route::post('stripe/webhook', 'WebhookController@handleWebhook');
     //Thrivecart handler
-    Route::post('thrivecart', 'TrivecartController@handle');
+    Route::post('thrivecart', 'ThrivecartController@handle');
 
-    Route::get('cart_redirect', 'TrivecartController@cartRedirect');
+    Route::get('cart_redirect', 'ThrivecartController@cartRedirect');
 });
 
 //Auth

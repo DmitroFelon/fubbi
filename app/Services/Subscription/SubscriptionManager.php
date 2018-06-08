@@ -50,6 +50,6 @@ class SubscriptionManager
         //set quiz flag in case user will click "back" button
         Session::put('quiz', $project->id);
         $data['project'] = $project;
-        return $project;
+        return $data['project'];
     }
 }
