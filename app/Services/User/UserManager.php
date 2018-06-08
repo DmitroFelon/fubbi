@@ -8,11 +8,15 @@
 
 namespace App\Services\User;
 
+use App\Models\Project;
 use App\User;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Notifications\ChangeEmail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
+use App\Models\Team;
+use App\Models\Helpers\ProjectStates;
 
 /**
  * Class UserManager
@@ -104,5 +108,139 @@ class UserManager
                 'error', $error['message']
             );
         }
+    }
+
+    /**
+     * @param User $user
+     * @param array $params
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function userCreate(User $user, array $params)
+    {
+        $user->fill($params);
+        $user->password = bcrypt($params['password']);
+        $user->save();
+        $user->roles()->attach($params['role']);
+        $user->save();
+        if (array_key_exists('team', $params) and $params['team'] > 0) {
+            $team = Team::find($params['team']);
+            if ($team) {
+                $user->teams()->attach($team);
+            }
+        }
+        Cache::set('temp_password_' . $user->id, $params['password']);
+    }
+
+    /**
+     * @param User $user
+     * @param array $params
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function userUpdate(User $user, array $params)
+    {
+        $user->fill($params);
+        if ($params['password']) {
+            $user->password = bcrypt($params['password']);
+        }
+        $user->setMetaArray($params);
+        $user->save();
+        if (array_key_exists('redirect_to_last_project', $params)) {
+            $last_project = $user->projects()->latest('id')->first();
+            if ($last_project) {
+                return redirect()
+                    ->action('Resources\ProjectController@edit', [$last_project, 's' => ProjectStates::QUIZ_FILLING])
+                    ->with('success', _i('Please, fill the quiz.'));
+            }
+        }
+        return redirect()->back()->with('success', _i('Profile has been saved successfully'));
+    }
+
+    /**
+     * @param $userId
+     * @param $currentUserId
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function blockOrRestore($userId, $currentUserId)
+    {
+        if ($currentUserId == $userId) {
+            return redirect()->back()->with('error', "You can't block yourself");
+        }
+        $user = User::withTrashed()->find($userId);
+        if ($user->trashed()) {
+            $user->restore();
+            return redirect()->back()->with('success', $user->name . ' has been restored');
+        }
+        $user->delete();
+        return redirect()->back()->with('error', $user->name . ' has been blocked');
+    }
+
+    /**
+     * @param User $user
+     * @param array $params
+     * @param Project $project
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function declineProjectInvite(User $user, array $params, Project $project)
+    {
+        $invite = $user->getInviteToProject($project->id);
+        if (!$invite) {
+            return redirect()->back()->with('error', "You can't perform this action");
+        }
+        $invite->decline();
+        return redirect()->action('Resources\ProjectController@show', [$project])->with('info', _i('You are declined this project'));
+    }
+
+    /**
+     * @param Project $project
+     * @param User $user
+     * @return mixed
+     */
+    public function acceptProjectInvite(Project $project, User $user)
+    {
+        $data['access'] = 1;
+        $message_key = 'info';
+        if ($project->hasWorker($user->role) or $project->teams->isNotEmpty()) {
+            $message_key = 'error';
+            $message     = _i('You are too late. This project already has %s', [$user->role]);
+        } else {
+            $project->attachWorker($user->id);
+            $invite = $user->getInviteToProject($project->id);
+            if (!$invite) {
+                $data['access'] = 0;
+                return $data;
+            }
+            $invite->accept();
+            $message = _i('You are applied to this project');
+        }
+        $data['message_key'] = $message_key;
+        $data['message'] = $message;
+        return $data;
+    }
+
+    /**
+     * @param User $user
+     * @param Team $team
+     */
+    public function acceptTeamInvite(User $user, Team $team)
+    {
+        $team->users()->attach($user->id);
+        $invite = $user->getInviteToTeam($team->id);
+        if (!$invite) {
+            abort(403);
+        }
+        $invite->accept();
+    }
+
+    /**
+     * @param User $user
+     * @param Team $team
+     */
+    public function declineTeamInvite(User $user, Team $team)
+    {
+        $invite = $user->getInviteToTeam($team->id);
+        if (!$invite) {
+            abort(403);
+        }
+        $invite->decline();
     }
 }

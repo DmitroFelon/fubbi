@@ -12,8 +12,19 @@ use App\Models\Project;
 use App\User;
 use Illuminate\Support\Facades\Session;
 
+/**
+ * Class SubscriptionManager
+ * @package App\Services\Subscription
+ */
 class SubscriptionManager
 {
+    /**
+     * @param User $user
+     * @param Project $project
+     * @param array $params
+     * @param $state
+     * @return Project
+     */
     public function subscriptionCreate(User $user, Project $project, array  $params, $state)
     {
         $data['error'] = '';

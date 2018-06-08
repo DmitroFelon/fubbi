@@ -113,7 +113,6 @@ class User extends Authenticatable implements HasMedia
         'card_brand',
         'card_last_four',
         'trial_ends_at',
-        'password',
     ];
 
     /**
@@ -148,12 +147,32 @@ class User extends Authenticatable implements HasMedia
      */
     protected $appends = ['role'];
 
+    /**
+     * @return mixed
+     */
+    public function setMetaArray()
+    {
+        list($metas) = func_get_args();
+        foreach ($metas as $key => $value) {
+            $this->setMetaString($key, $value);
+        }
+        return $this->metaData->sortByDesc('id')
+            ->take(count($metas));
+    }
+
+    /**
+     * @param $email
+     * @param $token
+     */
     public function resetEmail($email, $token)
     {
         User::where('email', '=', $this->email)->update(['email' => $email]);
         DB::table('reset_email')->where('token', $token)->delete();
     }
 
+    /**
+     *
+     */
     public function restore()
     {
         $this->restoreA();

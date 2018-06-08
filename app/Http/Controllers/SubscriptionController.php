@@ -7,9 +7,19 @@ use App\Models\Project;
 use App\Services\Subscription\SubscriptionManager;
 use Illuminate\Http\Request;
 
+/**
+ * Class SubscriptionController
+ * @package App\Http\Controllers
+ */
 class SubscriptionController extends Controller
 {
 
+    /**
+     * @param Request $request
+     * @param Project $project
+     * @param SubscriptionManager $subscriptionManager
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function __invoke(Request $request, Project $project, SubscriptionManager $subscriptionManager)
     {
         $data = $subscriptionManager->subscriptionCreate($request->user(), $project, $request->input(), ProjectStates::QUIZ_FILLING);
