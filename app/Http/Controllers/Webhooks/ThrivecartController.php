@@ -6,13 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Helpers\ProjectStates;
 use App\Models\Project;
 use App\Models\Role;
+use App\Services\User\UserManager;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
@@ -23,19 +23,17 @@ use Stripe\Subscription;
  * Class TrivecartController
  * @package App\Http\Controllers\Webhooks
  */
-class TrivecartController extends Controller
+class ThrivecartController extends Controller
 {
-
-
     /**
      * @var Project
      */
     protected $project;
+
     /**
      * @var \Laravel\Cashier\Subscription
      */
     protected $subscription;
-
 
     /**
      * @var array
@@ -69,19 +67,15 @@ class TrivecartController extends Controller
     {
         $event = $request->input('event');
         $hash  = $request->input('thrivecart_secret');
-
         if ($hash != config('fubbi.thrivecart_key')) {
             Log::error('wrong hash: ' . $hash);
             return new Response('Unauthorized request', 200);
         }
-
         if (!in_array($event, $this->events)) {
             Log::error('wrong event: ' . $event);
             return new Response('Undefined event', 200);
         }
-
         $method = camel_case(str_replace('.', '_', $event));
-
         return method_exists($this, $method)
             ? call_user_func([$this, $method], $request)
             : new Response('Webhook Handled', 200);
@@ -89,9 +83,11 @@ class TrivecartController extends Controller
 
     /**
      * @param Request $request
-     * @return Response|string
+     * @param UserManager $userManager
+     * @return Response
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function orderSuccess(Request $request)
+    public function orderSuccess(Request $request, UserManager $userManager)
     {
         $product_id = $request->input('base_product');
 
@@ -99,45 +95,59 @@ class TrivecartController extends Controller
             Log::error('wrong product_id: ' . $product_id);
             return new Response('Webhook Handled', 200);
         }
-
         try {
-            $customer_identifier = $request->input('customer_identifier'); //stripe customer id
-            $customer            = $request->input('customer'); //form data
-            $subscription_id     = collect($request->input('subscriptions'))->first(); //subscription ids, get first
-
-            $plan_id        = config('fubbi.thrive_cart_plans')[$product_id];
-            $customer_email = $customer['email']??'';
-
+            //stripe customer id
+            $customer_identifier = $request->input('customer_identifier');
+            //form data
+            $customer            = $request->input('customer');
+            //subscription ids, get first
+            $subscription_id     = collect($request->input('subscriptions'))->first();
+            $plan_id             = config('fubbi.thrive_cart_plans')[$product_id];
             $stripe_customer     = Customer::retrieve($customer_identifier);
             $stripe_subscription = Subscription::retrieve($subscription_id);
-            $custome_card        = collect($stripe_customer->sources->data)->first();
-
-            $user = User::whereEmail($customer_email)->first();
+            $customer_card       = collect($stripe_customer->sources->data)->first();
+            $user                = User::whereEmail($customer['email'] ?? '')->first();
             if (!$user) {
                 $tmp_password = str_random(8);
-                $user         = User::create([
-                    'email'          => $customer_email,
-                    'first_name'     => $customer['first_name'] ?? '',
-                    'last_name'      => $customer['last_name'] ?? '',
-                    'password'       => Hash::make($tmp_password),
-                    'phone'          => $customer['contactno']??'',
-                    'stripe_id'      => $stripe_subscription->customer,
-                    'trial_ends_at'  => Carbon::createFromTimestamp($stripe_subscription->trial_end),
-                    'card_brand'     => $custome_card->brand,
-                    'card_last_four' => $custome_card->last4,
-                ]);
+                $customer['password'] = Hash::make($tmp_password);
+                $customer['phone'] = $customer['contactno'] ?? '';
+                $customer['stripe_id'] = $stripe_subscription->customer;
+                $customer['trial_ends_at'] = Carbon::createFromTimestamp($stripe_subscription->trial_end);
+                $customer['card_brand'] = $customer_card->brand;
+                $customer['card_last_four'] = $customer_card->last4;
+                $customer['address_line_1'] = $customer_card->address_line1;
+                $customer['zip'] = $customer_card->address_zip;
+                $customer['city'] = $customer_card->address_city;
+                $customer['country'] = $customer_card->address_country;
+                $customer['state'] = $customer['address']['state'] ?? '';
+                $customer['role'] = Role::CLIENT;
+                try {
+                    $userManager->userCreate($user, $customer);
+                } catch (\Exception $e) {
 
-                $user->tmp_password = $tmp_password;
-                $user->save();
-
-                $role = Role::where('name', Role::CLIENT)->first();
-                $user->attachRole($role);
-                $user->setMeta('address_line_1', $custome_card->address_line1);
-                $user->setMeta('zip', $custome_card->address_zip);
-                $user->setMeta('city', $custome_card->address_city);
-                $user->setMeta('country', $custome_card->address_country);
-                $user->setMeta('state', $customer['address']['state'] ?? '');
-                $user->save();
+                }
+//                $tmp_password = str_random(8);
+//                $user         = User::create([
+//                    'email'          => $customer['email'] ?? '',
+//                    'first_name'     => $customer['first_name'] ?? '',
+//                    'last_name'      => $customer['last_name'] ?? '',
+//                    'password'       => Hash::make($tmp_password),
+//                    'phone'          => $customer['contactno'] ?? '',
+//                    'stripe_id'      => $stripe_subscription->customer,
+//                    'trial_ends_at'  => Carbon::createFromTimestamp($stripe_subscription->trial_end),
+//                    'card_brand'     => $customer_card->brand,
+//                    'card_last_four' => $customer_card->last4,
+//                ]);
+//                $user->tmp_password = $tmp_password;
+//                $user->save();
+//                $role = Role::where('name', Role::CLIENT)->first();
+//                $user->attachRole($role);
+//                $user->setMeta('address_line_1', $customer_card->address_line1);
+//                $user->setMeta('zip', $customer_card->address_zip);
+//                $user->setMeta('city', $customer_card->address_city);
+//                $user->setMeta('country', $customer_card->address_country);
+//                $user->setMeta('state', $customer['address']['state'] ?? '');
+//                $user->save();
             }
 
             $subscription              = $this->subscription;

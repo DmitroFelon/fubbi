@@ -120,6 +120,7 @@ class UserManager
         $user->fill($params);
         $user->password = bcrypt($params['password']);
         $user->save();
+        $user->setMetaArray($params);
         $user->roles()->attach($params['role']);
         $user->save();
         if (array_key_exists('team', $params) and $params['team'] > 0) {
