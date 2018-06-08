@@ -109,6 +109,7 @@ class User extends Authenticatable implements HasMedia
         'last_name',
         'phone',
         'email',
+        'password',
         'stripe_id',
         'card_brand',
         'card_last_four',
