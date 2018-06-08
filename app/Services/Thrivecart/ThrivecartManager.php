@@ -21,10 +21,10 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Helpers\ProjectStates;
 
 /**
- * Class ThrivacartManager
+ * Class ThrivecartManager
  * @package App\Services\Thrivecart
  */
-class ThrivacartManager
+class ThrivecartManager
 {
     /**
      * @param UserManager $userManager

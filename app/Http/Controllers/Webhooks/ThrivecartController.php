@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Helpers\ProjectStates;
 use App\Models\Project;
 use App\Services\Subscription\SubscriptionManager;
-use App\Services\Thrivecart\ThrivacartManager;
+use App\Services\Thrivecart\ThrivecartManager;
 use App\Services\User\UserManager;
 use App\User;
 use Illuminate\Http\RedirectResponse;
@@ -81,10 +81,12 @@ class ThrivecartController extends Controller
     /**
      * @param Request $request
      * @param UserManager $userManager
+     * @param SubscriptionManager $subscriptionManager
+     * @param ThrivecartManager $thrivecartManager
      * @return Response
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function orderSuccess(Request $request, UserManager $userManager, SubscriptionManager $subscriptionManager, ThrivacartManager $thrivacartManager)
+    public function orderSuccess(Request $request, UserManager $userManager, SubscriptionManager $subscriptionManager, ThrivecartManager $thrivecartManager)
     {
         $product_id = $request->input('base_product');
         if (!$product_id or !isset(config('fubbi.thrive_cart_plans')[$product_id])) {
@@ -92,7 +94,7 @@ class ThrivecartController extends Controller
             return new Response('Webhook Handled', 200);
         }
         try {
-            $thrivacartManager->create($userManager, $subscriptionManager, $request->input(), $this->project);
+            $thrivecartManager->create($userManager, $subscriptionManager, $request->input(), $this->project);
         } catch (\Exception $e) {
             Log::error($e);
         }
