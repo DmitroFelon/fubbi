@@ -11,7 +11,6 @@ use Musonza\Chat\Chat;
 use Musonza\Chat\Facades\ChatFacade;
 use Musonza\Chat\Notifications\MessageSent;
 
-
 /**
  * Class MessageController
  * @package App\Http\Controllers

@@ -7,11 +7,13 @@
     @endif
 </a>
 <ul id="topnav-alerts-list" class="dropdown-menu dropdown-messages">
-    @each('partials.navbar-elements.alert-row',
-        $notifications->take(5),
-         'notification',
-         'partials.navbar-elements.alert-row-empty'
-    )
+    @if($notifications->count())
+        @each('partials.navbar-elements.alert-row',
+            $notifications->take(5),
+             'notification',
+             'partials.navbar-elements.alert-row-empty'
+        )
+    @endif
     <li>
         <div class="text-center link-block">
             <a href="{{url('notification')}}">

@@ -9,7 +9,8 @@ try {
     window.$ = window.jQuery = require('jquery');
     require('jquery-validation');
     require('bootstrap-sass');
-    window.Dropzone = require('dropzone')
+    window.Dropzone = require('dropzone');
+    require('bootstrap-suggest');
 } catch (e) {
     console.log(e)
 }
@@ -50,7 +51,7 @@ try {
 
     window.Echo = new Echo({
         broadcaster: 'pusher',
-        key: '4f539992504be074c712',
+        key: '54173105056deb97f7e1',
         cluster: 'eu',
         encrypted: true,
         namespace: 'App.Events'

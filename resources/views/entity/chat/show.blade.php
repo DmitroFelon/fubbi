@@ -6,7 +6,7 @@
             <div id="chat-discussion" class="chat-discussion">
                 @each('entity.chat.partials.message', $chat_messages, 'chat_message')
             </div>
-            @include('entity.chat.partials.input')
+            @include('entity.chat.partials.input', ['userSuggestions' => $userSuggestions])
         </div>
         <div class="col-md-2">
             <div class="chat-users">

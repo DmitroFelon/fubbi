@@ -5,5 +5,7 @@
 
     <div class="chat-user-name">
         <a href="#">{{$user->name}}</a>
+        <br>
+        <a href="#">{{ '(@' . $user->username . ')'}}</a>
     </div>
 </div>

@@ -36,6 +36,16 @@ class NotificationController extends Controller
     }
 
     /**
+     * @param NotificationRepository $notificationRepository
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function indexMessages(NotificationRepository $notificationRepository)
+    {
+        $data = $notificationRepository->allUserMessages(Auth::user());
+        return view('entity.notification.messages', $data);
+    }
+
+    /**
      * @param $id
      * @param NotificationManager $notificationManager
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector

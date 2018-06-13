@@ -26,10 +26,33 @@ class NotificationRepository
         $page_notifications = $user
             ->notifications()
             ->where('type', '!=', MessageSent::class)
+            ->where('type', '!=', 'App\Notifications\NewChatMessage')
             ->paginate(10);
         $has_unread_notifications = $user
             ->unreadNotifications()
             ->where('type', '!=', MessageSent::class)
+            ->where('type', '!=', 'App\Notifications\NewChatMessage')
+            ->get()->isNotEmpty();
+        $data = [
+            'page_notifications'       => $page_notifications,
+            'has_unread_notifications' => $has_unread_notifications,
+        ];
+        return $data;
+    }
+
+    /**
+     * @param User $user
+     * @return array
+     */
+    public function allUserMessages(User $user)
+    {
+        $page_notifications = $user
+            ->notifications()
+            ->where('type', '=', 'App\Notifications\NewChatMessage')
+            ->paginate(10);
+        $has_unread_notifications = $user
+            ->unreadNotifications()
+            ->where('type', '=', 'App\Notifications\NewChatMessage')
             ->get()->isNotEmpty();
         $data = [
             'page_notifications'       => $page_notifications,

@@ -12,7 +12,6 @@ use App\User;
 use Musonza\Chat\Chat;
 use App\Models\Role;
 
-
 /**
  * Class MessageRepository
  * @package App\Services\Message
@@ -31,11 +30,13 @@ class MessageRepository
             return ['error'];
         }
         $conversation->readAll($user);
+        $userSuggestions = SearchSuggestion::toView($conversation);
         $messages = $conversation->messages()->orderBy('id', 'desc')->take(50)->get()->reverse();
         $data = [
-            'chat_messages' => $messages,
-            'participants'  => $conversation->users,
-            'conversation'  => $id
+            'chat_messages'   => $messages,
+            'participants'    => $conversation->users,
+            'conversation'    => $id,
+            'userSuggestions' => $userSuggestions,
         ];
         return $data;
     }
@@ -60,7 +61,6 @@ class MessageRepository
             'conversations'     => $conversations,
             'has_conversations' => $conversations
         ]);
-
     }
 
     /**

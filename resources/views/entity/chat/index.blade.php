@@ -87,6 +87,20 @@
 
 @section('scripts')
     <script>
+        function getOptions() {
+            var names = $('.chat-options').attr('data-options');
+            var users = JSON.parse(names);
+            var options = {
+                data: users,
+                map: function(user) {
+                    return {
+                        value: user.username,
+                        text: '<b>' + user.username + '</b>'
+                    }
+                }
+            };
+            $('#chat-input').suggest({ '@': options });
+        };
         function conversationsSearch() {
             // Declare variables
             var input, filter, ul, li, a, i;
@@ -146,7 +160,7 @@
                 }
                 conversation_id = $("#chat-id").val();
                 var old_notifications = $(".top-message-list-item[data-conversation-id='" + conversation_id + "']");
-                //clear notifications from curent chat
+                //clear notifications from current chat
                 old_notifications.each(function (i, obj) {
                     obj.remove();
                     $(".divider[data-divider-id='" + conversation_id + "']").remove();

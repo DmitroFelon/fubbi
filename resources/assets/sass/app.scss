@@ -42,6 +42,8 @@
 //Fubbi styles
 @import "style.css";
 
+@import "~bootstrap-suggest/bootstrap-suggest.css";
+
 // Clear layout on print mode
 @media print {
   nav.navbar-static-side {

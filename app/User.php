@@ -21,8 +21,6 @@ use Kodeine\Metable\Metable;
 use Laravel\Cashier\Billable;
 use Laravel\Scout\Searchable;
 use Musonza\Chat\Conversations\Conversation;
-use Musonza\Chat\Facades\ChatFacade;
-use Musonza\Chat\Messages\Message;
 use Musonza\Chat\Notifications\MessageSent;
 use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
 use Spatie\MediaLibrary\HasMedia\Interfaces\HasMedia;
@@ -114,6 +112,7 @@ class User extends Authenticatable implements HasMedia
         'card_brand',
         'card_last_four',
         'trial_ends_at',
+        'username'
     ];
 
     /**
@@ -373,7 +372,10 @@ class User extends Authenticatable implements HasMedia
      */
     public function getNotifications()
     {
-        return $this->unreadNotifications()->where('type', '!=', MessageSent::class)->orderBy('created_at', 'asc')
+        return $this->unreadNotifications()
+                    ->where('type', '!=', MessageSent::class)
+                    ->where('type', '!=', 'App\Notifications\NewChatMessage')
+                    ->orderBy('created_at', 'asc')
                     ->get();
     }
 
@@ -382,34 +384,10 @@ class User extends Authenticatable implements HasMedia
      */
     public function getMessageNotifications()
     {
-        $messages = $this->unreadNotifications()->where('type', '=', MessageSent::class)->get();
-
-        $messages->transform(function ($notification, $key) use ($messages) {
-            $message = Message::find($notification->data['message_id']);
-
-            if (!$message) {
-                return;
-            }
-
-            if (!$message->sender) {
-                return null;
-            }
-
-            if ($message->sender->id == $this->id) {
-                $notification->markAsRead();
-                return null;
-            }
-
-            $notification->message = \Musonza\Chat\Messages\Message::find($message->id);
-
-            $notification->conversation = ChatFacade::conversation($message->conversation_id);
-
-            return $notification;
-        });
-
-        $messages = $messages->filter();
-
-        return $messages;
+        return $this->unreadNotifications()
+                    ->where('type', '=', 'App\Notifications\NewChatMessage')
+                    ->orderBy('created_at', 'asc')
+                    ->get();
     }
 
     /**
