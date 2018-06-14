@@ -8,58 +8,103 @@
 
 namespace App\ViewComposers\Pages\Admin;
 
-
-use App\Models\Article;
 use App\Models\Role;
-use App\User;
-use Carbon\Carbon;
+use App\Services\Article\DeclinedArticleRepository;
+use App\Services\User\UserRepository;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
+/**
+ * Class DeclinedArticlesComposer
+ * @package App\ViewComposers\Pages\Admin
+ */
 class DeclinedArticlesComposer
 {
 
+    /**
+     * @var Request
+     */
     protected $request;
 
-    public function __construct(Request $request)
+    /**
+     * @var UserRepository
+     */
+    protected $userRepository;
+
+    /**
+     * @var DeclinedArticleRepository
+     */
+    protected $declinedArticleRepository;
+
+    /**
+     * @var array
+     */
+    protected $timeConstrains;
+
+    /**
+     * DeclinedArticlesComposer constructor.
+     * @param Request $request
+     * @param UserRepository $userRepository
+     * @param DeclinedArticleRepository $declinedArticleRepository
+     */
+    public function __construct(
+        Request $request,
+        UserRepository $userRepository,
+        DeclinedArticleRepository $declinedArticleRepository
+    )
     {
         $this->request = $request;
+        $this->userRepository = $userRepository;
+        $this->declinedArticleRepository = $declinedArticleRepository;
+        $this->timeConstrains = $this->request->only(['date_from', 'date_to']);
     }
 
+    /**
+     * @param View $view
+     * @return View
+     */
     public function compose(View $view)
     {
-        $key = 'declined_articles'
-            . Auth::user()->role
-            . $this->request->input('customer')
-            . $this->request->input('date_from')
-            . $this->request->input('date_to');
-        $declined_articles = Cache::remember(base64_encode($key), Carbon::MINUTES_PER_HOUR * Carbon::HOURS_PER_DAY, function () {
-            if (Auth::user()->role == Role::ADMIN) {
-                $query = Article::declined();
-            } else {
-                $query = Auth::user()->articles()->declined();
-            }
-            if ($this->request->has('customer') and $this->request->input('customer') != '') {
-                $user = User::search($this->request->input('customer'))->first();
-                if ($user) {
-                    $client_id = $user->id;
-                    $query->whereHas('project', function ($query) use ($client_id) {
-                        $query->where('client_id', $client_id);
-                    });
-                }
-            }
-            if ($this->request->has('date_from')) {
-                $from = Carbon::createFromFormat('m/d/Y', $this->request->input('date_from'));
-                $query->where('updated_at', '>', $from);
-            }
-            if ($this->request->has('date_to')) {
-                $to = Carbon::createFromFormat('m/d/Y', $this->request->input('date_to'));
-                $query->where('updated_at', '<', $to);
-            }
-            return $query->get();
-        });
-        return $view->with(compact('declined_articles', 'declined_articles_count'));
+        return $view->with(['declined_articles' => $this->getDeclinedArticles()]);
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection|mixed
+     */
+    protected function getDeclinedArticles()
+    {
+        return $this->checkCustomer() ? $this->getArticlesByCustomer() : $this->getArticlesWithoutCustomer();
+    }
+
+    /**
+     * @return string
+     */
+    protected function checkCustomer()
+    {
+        return trim($this->request->input('customer'));
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection|mixed
+     */
+    protected function getArticlesByCustomer()
+    {
+        $declinedArticles = collect([]);
+        $user = $this->userRepository->search($this->request->input('customer'));
+        if ($user) {
+            $declinedArticles = $this->declinedArticleRepository->articlesByClient($user->id, $this->timeConstrains);
+        }
+
+        return $declinedArticles;
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function getArticlesWithoutCustomer()
+    {
+        return $this->request->user()->role == Role::ADMIN
+            ? $this->declinedArticleRepository->allArticles($this->timeConstrains)
+            : $this->declinedArticleRepository->articlesByRelatedProjects($this->request->user()->id, $this->timeConstrains);
     }
 }

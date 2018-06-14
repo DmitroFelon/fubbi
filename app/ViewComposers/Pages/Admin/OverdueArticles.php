@@ -8,15 +8,11 @@
 
 namespace App\ViewComposers\Pages\Admin;
 
-
-use App\Models\Article;
 use App\Models\Role;
-use App\User;
-use Carbon\Carbon;
+use App\Services\User\UserRepository;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
+use App\Services\Article\OverdueArticleRepository;
 
 /**
  * Class OverdueArticles
@@ -26,43 +22,89 @@ class OverdueArticles
 {
 
     /**
+     * @var array|string
+     */
+    protected $overdue;
+
+    /**
      * @var Request
      */
     protected $request;
 
     /**
+     * @var OverdueArticleRepository
+     */
+    protected $overdueArticleRepository;
+
+    /**
+     * @var UserRepository
+     */
+    protected $userRepository;
+
+    /**
      * OverdueArticles constructor.
      * @param Request $request
+     * @param OverdueArticleRepository $overdueArticleRepository
+     * @param UserRepository $userRepository
      */
-    public function __construct(Request $request)
+    public function __construct(
+        Request $request,
+        OverdueArticleRepository $overdueArticleRepository,
+        UserRepository $userRepository
+    )
     {
         $this->request = $request;
+        $this->overdueArticleRepository = $overdueArticleRepository;
+        $this->userRepository = $userRepository;
+        $this->overdue = $request->input('overdue');
     }
 
-
+    /**
+     * @param View $view
+     * @return View
+     */
     public function compose(View $view)
     {
-        $key = 'overdue_articles'. $this->request->input('overdue').$this->request->input('customer');
-        $articles = Cache::remember(base64_encode($key), Carbon::MINUTES_PER_HOUR * Carbon::HOURS_PER_DAY, function () {
-            $overdue = $this->request->input('overdue');
-            if (Auth::user()->role == Role::ADMIN) {
-                $query = Article::new();
-            } else {
-                $query = Auth::user()->articles()->new();
-            }
-            if ($this->request->has('customer') and $this->request->input('customer') != '') {
-                $user = User::search($this->request->input('customer'))->first();
-                if ($user) {
-                    $client_id = $user->id;
-                    $query->whereHas('project', function ($query) use ($client_id) {
-                        $query->where('client_id', $client_id);
-                    });
-                }
-            }
-            $query->overdue($overdue);
-            return $query->get();
-        });
-        return $view->with(compact('articles'));
+        return $view->with(['articles' => $this->getArticles()]);
     }
 
+    /**
+     * @return \App\Models\Article[]|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection
+     */
+    protected function getArticles()
+    {
+        return $this->checkCustomer() ? $this->getArticlesByCustomer() : $this->getArticlesWithoutCustomer();
+    }
+
+    /**
+     * @return string
+     */
+    protected function checkCustomer()
+    {
+        return trim($this->request->input('customer'));
+    }
+
+    /**
+     * @return \App\Models\Article[]|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection
+     */
+    protected function getArticlesByCustomer()
+    {
+        $articles = collect([]);
+        $user = $this->userRepository->search($this->request->input('customer'));
+        if ($user) {
+            $articles = $this->overdueArticleRepository->articlesByClient($user->id, $this->overdue);
+        }
+
+        return $articles;
+    }
+
+    /**
+     * @return \App\Models\Article[]|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
+     */
+    protected function getArticlesWithoutCustomer()
+    {
+        return $this->request->user()->role == Role::ADMIN
+            ? $this->overdueArticleRepository->allArticles($this->overdue)
+            : $this->overdueArticleRepository->articlesByRelatedProjects($this->request->user()->id, $this->overdue);
+    }
 }

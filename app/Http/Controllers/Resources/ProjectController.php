@@ -222,7 +222,7 @@ class ProjectController extends Controller
      */
     public function detachUser(Project $project, User $user, ProjectManager $projectManager)
     {
-        $data = $projectManager->detachUser($project, $user);
+        $data = $projectManager->detachUsers($project, $user);
         return redirect()->back()->with($data['message_key'], $data['message']);
     }
 

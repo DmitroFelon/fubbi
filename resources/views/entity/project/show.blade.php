@@ -20,7 +20,9 @@
             @component('components.ibox')
             @slot('title') {{_i('Project: ')}} {{ $project->name }} @endslot
             @slot('tools')
-            <a href="{{ route('project.plan.edit', ['project' => $project->id, 'plan' => $project->subscription->stripe_id]) }}" class="btn btn-success btn-xs btn-xs m-r-sm p-w-sm">Update plan requirements</a>
+            @if (Auth::user()->role == \App\Models\Role::ADMIN || Auth::user()->role == \App\Models\Role::ACCOUNT_MANAGER)
+                <a href="{{ route('project.plan.edit', ['project' => $project->id, 'plan' => $project->subscription->stripe_id]) }}" class="btn btn-success btn-xs btn-xs m-r-sm p-w-sm">Update plan requirements</a>
+            @endif
             @include('entity.project.partials.show.tools')
             @endslot
             <h3 class="text-center">{{_i('Summary')}}</h3>

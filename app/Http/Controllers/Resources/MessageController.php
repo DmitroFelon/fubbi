@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Musonza\Chat\Chat;
 use Musonza\Chat\Facades\ChatFacade;
 use Musonza\Chat\Notifications\MessageSent;
+use App\Events\ChatMessage;
 
 /**
  * Class MessageController
@@ -32,10 +33,16 @@ class MessageController extends Controller
      * @param Request $request
      * @param Chat $chat
      * @param MessageManager $messageManager
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request, Chat $chat, MessageManager $messageManager)
     {
-        $messageManager->create($request->user(), $chat, $request->input());
+        try {
+            $message = $messageManager->create($request->user(), $chat, $request->input());
+            broadcast(new ChatMessage($message));
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()]);
+        }
     }
 
     /**

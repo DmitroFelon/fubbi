@@ -6,7 +6,6 @@ use App\Models\Role;
 use App\Models\Article;
 use App\Models\Project;
 use App\User;
-use Illuminate\Http\Request;
 
 /**
  * Class ArticleRepository

@@ -8,10 +8,10 @@
 
 namespace App\Services\Message;
 
-use App\Events\ChatMessage;
 use App\User;
 use Musonza\Chat\Chat;
 use App\Jobs\NewMessageNotification;
+use App\Services\User\UserRepository;
 
 /**
  * Class MessageManager
@@ -19,22 +19,30 @@ use App\Jobs\NewMessageNotification;
  */
 class MessageManager
 {
+    protected $userRepository;
+
+    public function __construct()
+    {
+        $this->userRepository = new UserRepository();
+    }
+
     /**
      * @param User $user
      * @param Chat $chat
      * @param array $params
-     * @return \Illuminate\Http\JsonResponse
+     * @return mixed
+     * @throws \Exception
      */
     public function create(User $user, Chat $chat, array $params)
     {
         $conversation = $chat->conversation($params['conversation']);
-        try {
-            $message = $chat->message($params['message'])->from($user->id)->to($conversation)->for($user)->send();
-            $message = $this->setMessageRecipients($message, $params['message'], $conversation->id);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
-        }
-        broadcast(new ChatMessage($message));
+        $message = $chat->message($params['message'])
+            ->from($user->id)
+            ->to($conversation)
+            ->for($user)
+            ->send();
+
+        return $this->setMessageRecipients($message, $params['message'], $conversation->id);
     }
 
     /**
@@ -48,19 +56,20 @@ class MessageManager
         $messageParts = explode(' ', $fullMessage);
         $recipients = [];
         foreach ($messageParts as $part) {
-            if(preg_match('/^@.{1,}/', $part)) {
+            if (preg_match('/^@.{1,}/', $part)) {
                 $recipient = substr($part, 1);
-                $user = User::where('username', $recipient)->first();
-                if($user) {
+                $user = $this->userRepository->findByUsername($recipient);
+                if ($user) {
                     NewMessageNotification::dispatch($user, $conversationId);
                     array_push($recipients, $recipient);
                 }
             }
         }
-        if(!empty($recipients)) {
+        if (! empty($recipients)) {
             $messageInstance->recipients = json_encode($recipients);
             $messageInstance->save();
         }
+
         return $messageInstance;
     }
 }

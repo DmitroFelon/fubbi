@@ -354,16 +354,16 @@ class Article extends Model implements HasMedia
     {
         switch ($overdue) {
             case 1: // not overdue
-                $query->whereBetween('updated_at', [Carbon::now()->subDay(1), Carbon::now()]);
+                $query->whereBetween('articles.updated_at', [Carbon::now()->subDay(1), Carbon::now()]);
                 break;
             case 2: // 2 days overdue
-                $query->whereBetween('updated_at', [Carbon::now()->subDay(2), Carbon::now()->subDay(1)]);
+                $query->whereBetween('articles.updated_at', [Carbon::now()->subDay(2), Carbon::now()->subDay(1)]);
                 break;
             case 3: // 3 days overdue
-                $query->whereBetween('updated_at', [0, Carbon::now()->subDay(2)]);
+                $query->whereBetween('articles.updated_at', [0, Carbon::now()->subDay(2)]);
                 break;
             default:
-                $query->whereBetween('updated_at', [0, Carbon::now()->subDay($overdue - 1)]);
+                $query->whereBetween('articles.updated_at', [0, Carbon::now()->subDay($overdue - 1)]);
                 break;
         }
     }
