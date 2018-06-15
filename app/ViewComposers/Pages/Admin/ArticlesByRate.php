@@ -9,13 +9,10 @@
 namespace App\ViewComposers\Pages\Admin;
 
 
-use App\Models\Article;
 use App\Models\Role;
-use App\User;
-use Carbon\Carbon;
+use App\Services\Article\ArticlesByRateRepository;
+use App\Services\User\UserRepository;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 /**
@@ -24,66 +21,96 @@ use Illuminate\View\View;
  */
 class ArticlesByRate
 {
-
     /**
      * @var Request
      */
     protected $request;
 
     /**
+     * @var ArticlesByRateRepository
+     */
+    protected $articlesByRateRepository;
+
+    /**
+     * @var array
+     */
+    protected $timeConstrains;
+
+    /**
+     * @var UserRepository
+     */
+    protected $userRepository;
+
+    /**
+     * @var array|string
+     */
+    protected $rate;
+
+    /**
      * ArticlesByRate constructor.
      * @param Request $request
+     * @param UserRepository $userRepository
+     * @param ArticlesByRateRepository $articlesByRateRepository
      */
-    public function __construct(Request $request)
+    public function __construct(
+        Request $request,
+        UserRepository $userRepository,
+        ArticlesByRateRepository $articlesByRateRepository
+    )
     {
         $this->request = $request;
+        $this->userRepository = $userRepository;
+        $this->articlesByRateRepository = $articlesByRateRepository;
+        $this->timeConstrains = $request->only(['date_from', 'date_to']);
+        $this->rate = $request->input('rate');
     }
 
     /**
      * @param View $view
-     * @return $this
+     * @return View
      */
     public function compose(View $view)
     {
-        $key = 'article_by_rate'
-            . Auth::user()->role
-            . $this->request->input('rate')
-            . $this->request->input('customer')
-            . $this->request->input('date_from')
-            . $this->request->input('date_to');
-
-        $articles = Cache::remember(base64_encode($key), Carbon::MINUTES_PER_HOUR * Carbon::HOURS_PER_DAY, function () {
-            $rate = $this->request->input('rate');
-
-            if (Auth::user()->role == Role::ADMIN) {
-                $query = Article::withRating($rate, ($rate == 3) ? '<=' : '=');
-            } else {
-                $query = Auth::user()->articles()->withRating($rate, ($rate == 3) ? '<=' : '=');
-            }
-
-            if ($this->request->has('customer') and $this->request->input('customer') != '') {
-                $user = User::search($this->request->input('customer'))->first();
-                if ($user) {
-                    $query->whereHas('project', function ($query) use ($user) {
-                        $query->where('client_id', $user->id);
-                    });
-                }
-            }
-
-            if ($this->request->has('date_from')) {
-                $from = Carbon::createFromFormat('m/d/Y', $this->request->input('date_from'));
-                $query->where('created_at', '>', $from);
-            }
-
-            if ($this->request->has('date_to')) {
-                $to = Carbon::createFromFormat('m/d/Y', $this->request->input('date_to'));
-                $query->where('created_at', '<', $to);
-            }
-
-            return $query->get();
-        });
-
-        return $view->with(compact('articles'));
+        return $view->with(['articles' => $this->getArticlesByRate()]);
     }
 
+    /**
+     * @return \Illuminate\Support\Collection
+     */
+    protected function getArticlesByRate()
+    {
+        return $this->checkCustomer() ? $this->getArticlesByCustomer() : $this->getArticlesWithoutCustomer();
+    }
+
+    /**
+     * @return string
+     */
+    protected function checkCustomer()
+    {
+        return trim($this->request->input('customer'));
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection
+     */
+    protected function getArticlesByCustomer()
+    {
+        $articlesByRate = collect([]);
+        $user = $this->userRepository->search($this->request->input('customer'));
+        if ($user) {
+            $articlesByRate = $this->articlesByRateRepository->articlesByClient($user->id, $this->timeConstrains, $this->rate);
+        }
+
+        return $articlesByRate;
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function getArticlesWithoutCustomer()
+    {
+        return $this->request->user()->role == Role::ADMIN
+            ? $this->articlesByRateRepository->allArticles($this->timeConstrains, $this->rate)
+            : $this->articlesByRateRepository->articlesByRelatedProjects($this->request->user()->id, $this->timeConstrains, $this->rate);
+    }
 }
