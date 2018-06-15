@@ -294,16 +294,16 @@ class ProjectController extends Controller
      * @param Project $project
      * @param Request $request
      * @param ProjectManager $projectManager
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function prefill_files(Project $project, Request $request, ProjectManager $projectManager)
     {
         try{
-            $files = $projectManager->addFiles($project, $request->files);
+            $projectManager->addFiles($project, $request->file('file'), $request->input('file_type'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
-        return response()->json($files, 200);
+        return redirect()->back()->with('success', 'Files have been successfully added!');
     }
 
     /**

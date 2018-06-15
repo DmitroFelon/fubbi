@@ -149,7 +149,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::prefix('projects')->group(function () {
             Route::match(['post', 'put'], '{project}/prefill', 'ProjectController@prefill');
-            Route::post('{project}/prefill_files', 'ProjectController@prefill_files');
+            Route::post('{project}/prefill_files', 'ProjectController@prefill_files')->name('add.files');
             Route::get('{project}/get_stored_files', 'ProjectController@get_stored_files');
             Route::get('{project}/remove_stored_file/{media}', 'ProjectController@remove_stored_files');
             Route::get('{project}/export', 'ProjectController@export');

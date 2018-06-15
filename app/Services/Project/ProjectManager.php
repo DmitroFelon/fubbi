@@ -12,6 +12,7 @@ use App\Models\Project;
 use App\Models\Team;
 use App\User;
 use Spatie\MediaLibrary\Media;
+use Illuminate\Http\Request;
 
 /**
  * Class ProjectManager
@@ -89,19 +90,15 @@ class ProjectManager
 
     /**
      * @param Project $project
-     * @param $params
-     * @return Project
-     * @throws \Spatie\MediaLibrary\Exceptions\FileCannotBeAdded\FileDoesNotExist
-     * @throws \Spatie\MediaLibrary\Exceptions\FileCannotBeAdded\FileIsTooBig
+     * @param array $files
+     * @param $fileType
+     * @throws \Spatie\MediaLibrary\Exceptions\FileCannotBeAdded
      */
-    public function addFiles(Project $project, $params)
+    public function addFiles(Project $project, array $files, $fileType)
     {
-        $files = $project->addFiles($params);
-        $files->transform(function (Media $media) use ($project) {
-            $media->url = $project->prepareMediaConversion($media);
-            return $media;
-        });
-        return $files;
+        foreach ($files as $file){
+            $project->addMedia($file)->toMediaCollection($fileType);
+        }
     }
 
     /**
