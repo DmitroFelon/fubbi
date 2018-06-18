@@ -12,19 +12,21 @@
 
             <div class="row">
                 {{Form::open(['id' => 'team-form', 'action' => 'Resources\TeamController@store'])}}
-
-                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-6">
-                    {!! Form::bsText( 'name', null, _i('Name of the new team'), null, ['required' ] ) !!}
+                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-6 form-group{{ $errors->has('name') ? ' has-error' : '' }}">
+                    {!! Form::bsText( 'name', null, _i('Name of the new team'), null) !!}
                     @if ($errors->has('name'))
                         <span class="help-block">
                             <strong>{{ $errors->first('name') }}</strong>
                         </span>
                     @endif
-
                 </div>
-
-                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-10">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-10 form-group{{ $errors->has('name') ? ' has-error' : '' }}">
                     {!! Form::bsText( 'description', null, _i('Short description of the new team'), null, [] ) !!}
+                    @if ($errors->has('description'))
+                        <span class="help-block">
+                            <strong>{{ $errors->first('description') }}</strong>
+                        </span>
+                    @endif
                 </div>
 
                 <div class="col-xs-4 col-sm-4 col-md-4 col-lg-6">
