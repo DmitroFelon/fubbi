@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Services\User\UserManager;
 use App\User;
 use App\Http\Requests\CreateUserRequest;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\UpdateUserSettingsRequest;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Class UserController
@@ -16,19 +16,14 @@ use App\Http\Requests\UpdateUserSettingsRequest;
 class UserController extends Controller
 {
     /**
-     * @var User
-     */
-    protected $user;
-
-    /**
      * UserController constructor.
      * @param User $user
      */
     public function __construct(User $user)
     {
-        $this->middleware('can:index,' . User::class)->only(['index']);
-        $this->middleware('can:update,user')->only(['edit', 'update']);
-        $this->user = $user;
+        $this->middleware('can:index,' . User::class)->only(['index', 'destroy', 'create', 'store']);
+        $this->middleware('can:show,' . User::class)->only(['show']);
+        $this->middleware('can:update,' . User::class)->only(['edit', 'update']);
     }
 
     /**
@@ -36,7 +31,8 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = $this->user->withTrashed()->get();
+        $users = User::withTrashed()->get();
+
         return view('entity.user.index', compact('users'));
     }
 
@@ -60,8 +56,10 @@ class UserController extends Controller
         try {
             $userManager->userCreate($user, $request->input());
         } catch (\Exception $e) {
+
             return redirect()->back()->with('error', 'Something wrong happened while user creation. Try again, please.');
         }
+
         return redirect()->action('Resources\UserController@index')->with('success', 'User has been created successfully');
     }
 
@@ -71,8 +69,9 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        $user = $this->user->withTrashed()->findOrFail($id);
-        return view('entity.user.show', ['user' => $user]);
+        $targetUser = User::withTrashed()->findOrFail($id);
+
+        return view('entity.user.show', ['user' => $targetUser]);
     }
 
     /**
@@ -95,12 +94,12 @@ class UserController extends Controller
     }
 
     /**
-     * @param $id
+     * @param User $user
      * @param UserManager $userManager
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy($id, UserManager $userManager)
+    public function destroy(User $user, UserManager $userManager)
     {
-        return $userManager->blockOrRestore($id, Auth::user()->id);
+        return $userManager->blockOrRestore($user->id, Auth::user()->id);
     }
 }

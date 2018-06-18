@@ -164,6 +164,6 @@ class UserManager
             return redirect()->back()->with('success', $user->name . ' has been restored');
         }
         $user->delete();
-        return redirect()->back()->with('error', $user->name . ' has been blocked');
+        return redirect()->back()->with('success', $user->name . ' has been blocked');
     }
 }
