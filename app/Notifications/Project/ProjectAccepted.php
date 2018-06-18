@@ -2,9 +2,9 @@
 
 namespace App\Notifications\Project;
 
+use App\Notifications\NotificationPayload;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
 class ProjectAccepted extends Notification
@@ -31,7 +31,7 @@ class ProjectAccepted extends Notification
      */
     public function via($notifiable)
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -43,10 +43,11 @@ class ProjectAccepted extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->subject('Project accepted!')
-                    ->line(_i('Hello %s', [$notifiable->first_name]))
-                    ->line(_i('Project "%s" has been accepted by manager.', [$this->project->name]))
-                    ->line('Thank you for using our application!');
+            ->subject('Project accepted!')
+            ->line(_i('Hello %s', [$notifiable->first_name]))
+            ->line(_i('Project "%s" has been accepted by manager.', [$this->project->name]))
+            ->action('To project', url()->action('Resources\ProjectController@show', ['project' => $this->project->id]))
+            ->line('Thank you for using our application!');
     }
 
     /**
@@ -57,8 +58,15 @@ class ProjectAccepted extends Notification
      */
     public function toArray($notifiable)
     {
-        return [
-            //
-        ];
+        $notification = NotificationPayload::make(
+            _i(
+                'Project "%s" has been accepted by manager.',
+                [$this->project->name]
+            ),
+            url()->action('Resources\ProjectController@show', ['project' => $this->project->id]),
+            get_class($this->project),
+            $this->project->id
+        );
+        return $notification->toArray();
     }
 }
