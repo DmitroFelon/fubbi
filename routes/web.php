@@ -130,6 +130,12 @@ Route::middleware(['auth'])->group(function () {
         }
     );
 
+    Route::prefix('invite')->group(function() {
+        Route::get('team/{team}/accept', 'InviteController@acceptTeamInvite')->name('accept.team.invite');
+        Route::get('team/{team}/decline', 'InviteController@declineTeamInvite')->name('decline.team.invite');
+        Route::get('project/{project}/accept', 'InviteController@acceptProjectInvite')->name('accept.project.invite');
+        Route::get('project/{project}/decline', 'InviteController@declineProjectInvite')->name('decline.project.invite');
+    });
 
     Route::namespace('Resources')->group(function () {
 
@@ -139,10 +145,6 @@ Route::middleware(['auth'])->group(function () {
                     Route::get('accept_review/{project}', "ProjectController@acceptReview");
                     Route::get('reject_review/{project}', "ProjectController@rejectReview");
                 });
-                Route::get('apply_to_project/{project}', "UserController@apply_to_project");
-
-
-                Route::get('decline_project/{project}', "UserController@decline_project");
             }
         );
 
@@ -160,11 +162,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('{project}/remove_from_project/{user}', 'ProjectController@detachUser');
             Route::get('{project}/remove_team_from_project/{team}', 'ProjectController@detachTeam');
             Route::get('{project}/allow_modifications', 'ProjectController@allow_modifications');
-        });
-
-        Route::prefix('teams')->group(function () {
-            Route::get('accept/{team}', 'UserController@acceptTeamInvite');
-            Route::get('decline/{team}', 'UserController@declineTeamInvite');
         });
 
         Route::prefix('messages')->group(function () {

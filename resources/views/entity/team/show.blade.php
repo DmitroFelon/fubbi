@@ -8,11 +8,11 @@
                 {{_i('You are invited to this team')}}
             </h3>
             <div class="col-sm-6 text-center">
-                <a href="{{url("teams/accept/{$team->id}")}}"
+                <a href="{{ route('accept.team.invite', ['team' => $team->id]) }}"
                    class="btn btn-primary m-t-md">{{_i('Accept')}}</a>
             </div>
             <div class="col-sm-6 text-center">
-                <a href="{{url("teams/decline/{$team->id}")}}"
+                <a href="{{ route('decline.team.invite', ['team' => $team->id]) }}"
                    class="btn btn-danger m-t-md">{{_i('Decline')}}</a>
             </div>
         </div>

@@ -1,14 +1,7 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: user
- * Date: 01.06.18
- * Time: 16:03
- */
 
 namespace App\Services\User;
 
-use App\Models\Project;
 use App\User;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -172,75 +165,5 @@ class UserManager
         }
         $user->delete();
         return redirect()->back()->with('error', $user->name . ' has been blocked');
-    }
-
-    /**
-     * @param User $user
-     * @param array $params
-     * @param Project $project
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function declineProjectInvite(User $user, array $params, Project $project)
-    {
-        $invite = $user->getInviteToProject($project->id);
-        if (!$invite) {
-            return redirect()->back()->with('error', "You can't perform this action");
-        }
-        $invite->decline();
-        return redirect()->action('Resources\ProjectController@show', [$project])->with('info', _i('You are declined this project'));
-    }
-
-    /**
-     * @param Project $project
-     * @param User $user
-     * @return mixed
-     */
-    public function acceptProjectInvite(Project $project, User $user)
-    {
-        $data['access'] = 1;
-        $message_key = 'info';
-        if ($project->hasWorker($user->role) or $project->teams->isNotEmpty()) {
-            $message_key = 'error';
-            $message     = _i('You are too late. This project already has %s', [$user->role]);
-        } else {
-            $project->attachWorker($user->id);
-            $invite = $user->getInviteToProject($project->id);
-            if (!$invite) {
-                $data['access'] = 0;
-                return $data;
-            }
-            $invite->accept();
-            $message = _i('You are applied to this project');
-        }
-        $data['message_key'] = $message_key;
-        $data['message'] = $message;
-        return $data;
-    }
-
-    /**
-     * @param User $user
-     * @param Team $team
-     */
-    public function acceptTeamInvite(User $user, Team $team)
-    {
-        $team->users()->attach($user->id);
-        $invite = $user->getInviteToTeam($team->id);
-        if (!$invite) {
-            abort(403);
-        }
-        $invite->accept();
-    }
-
-    /**
-     * @param User $user
-     * @param Team $team
-     */
-    public function declineTeamInvite(User $user, Team $team)
-    {
-        $invite = $user->getInviteToTeam($team->id);
-        if (!$invite) {
-            abort(403);
-        }
-        $invite->decline();
     }
 }

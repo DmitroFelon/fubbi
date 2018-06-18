@@ -110,8 +110,8 @@ class Invite extends Model
 	public function decline()
 	{
 		$this->accepted = false;
-		$this->fireModelEvent('rejected', false);
-		return $this->save();
+        $this->save();
+        $this->fireModelEvent('rejected', false);
 	}
 
 	/**

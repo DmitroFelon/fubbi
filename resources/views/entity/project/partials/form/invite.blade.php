@@ -5,9 +5,9 @@
         </h3>
     </div>
     <div class="col-sm-6 text-center">
-        <a href="{{url("project/apply_to_project/{$project->id}")}}" class="btn m-t-md btn-primary">{{_i('Accept')}}</a>
+        <a href="{{ route('accept.project.invite', ['project' => $project->id]) }}" class="btn m-t-md btn-primary">{{_i('Accept')}}</a>
     </div>
     <div class="col-sm-6 text-center">
-        <a href="{{url("project/decline_project/{$project->id}")}}" class="btn m-t-md btn-danger">{{_i('Decline')}}</a>
+        <a href="{{ route('decline.project.invite', ['project' => $project->id]) }}" class="btn m-t-md btn-danger">{{_i('Decline')}}</a>
     </div>
 </div>

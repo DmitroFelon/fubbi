@@ -227,7 +227,9 @@ return [
         /*
          * Global notifications
          * */
-        \App\Providers\GlobalNotificationProvider::class
+        \App\Providers\GlobalNotificationProvider::class,
+
+        \App\Providers\InvitationServiceProvider::class,
     ],
 
     /*

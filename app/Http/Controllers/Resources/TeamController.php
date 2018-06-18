@@ -65,7 +65,7 @@ class TeamController extends Controller
      */
     public function store(CreateOrUpdateTeamRequest $request, Team $team, TeamManager $teamManager)
     {
-        $teamManager->createTeam(team, $request->input());
+        $teamManager->createTeam($team, $request->input());
         return redirect()->action('Resources\TeamController@index');
     }
 
