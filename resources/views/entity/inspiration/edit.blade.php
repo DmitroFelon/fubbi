@@ -78,11 +78,12 @@
             ];
 
             dropzones.forEach(function (id) {
-                var collection = $("#" + id).attr('data-collection')
+                var collection = $("#" + id).attr('data-collection');
                 var dropzone = new Dropzone("div#" + id, {
                     url: "/inspirations/{{$inspiration->id}}/storeFile/" + collection,
                     paramName: 'files',
                     method: 'POST',
+                    uploadMultiple: true,
                     headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                     addRemoveLinks: true,
                     collection: collection,

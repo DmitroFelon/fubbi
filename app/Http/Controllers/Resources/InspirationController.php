@@ -105,8 +105,9 @@ class InspirationController extends Controller
         if (!$request->hasFile('files')) {
             return null;
         }
-        return response()->json([$inspirationManager-$this->storeFile(
-                $request->user,
+
+        return response()->json([$inspirationManager->storeFile(
+                $request->user(),
                 $request->file('files'),
                 $this->inspiration,
                 $id,

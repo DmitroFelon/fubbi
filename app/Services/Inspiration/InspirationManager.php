@@ -19,15 +19,17 @@ class InspirationManager
 {
     /**
      * @param User $user
-     * @param $file
+     * @param $files
      * @param Inspiration $inspiration
      * @param $id
      * @param $collection
      * @return mixed
      */
-    public function storeFile(User $user, $file, Inspiration $inspiration, $id, $collection)
+    public function storeFile(User $user, $files, Inspiration $inspiration, $id, $collection)
     {
-        $media = $user->inspirations()->findOrFail($id)->addMedia($file->toMediaCollection($collection));
+        foreach ($files as $file) {
+            $media = $user->inspirations()->findOrFail($id)->addMedia($file)->toMediaCollection($collection);
+        }
         $media->url = $inspiration->prepareMediaConversion($media);
         return $media;
     }
