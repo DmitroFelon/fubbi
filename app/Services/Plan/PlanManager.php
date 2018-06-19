@@ -1,15 +1,10 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: user
- * Date: 07.06.18
- * Time: 15:53
- */
 
 namespace App\Services\Plan;
 
 use App\Models\Project;
 use Stripe\Plan;
+use App\Models\Traits\ResponseMessage;
 
 /**
  * Class PlanManager
@@ -17,12 +12,19 @@ use Stripe\Plan;
  */
 class PlanManager
 {
+    use ResponseMessage;
+
     /**
      * @param Plan $plan
      * @param $params
+     * @return \App\Services\Response\ResponseDTO
      */
-    public function updatePlan(Plan $plan, $params)
+    public function update(Plan $plan, $params)
     {
+        if ($params->isEmpty()) {
+
+            return $this->make('You have to add metadata to plan!', 'error');
+        }
         $params->transform(
             function ($item) {
                 if ($item == 'true' or $item == false) {
@@ -33,6 +35,9 @@ class PlanManager
         );
         $plan->metadata = $params->toArray();
         $plan->save();
+
+        return $this->make('Plan has been modified successfully!', 'success');
+
     }
 
     /**

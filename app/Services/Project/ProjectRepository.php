@@ -15,6 +15,7 @@ use App\Services\User\SearchSuggestions as UserSearchSuggestions;
 use App\Services\Project\SearchSuggestions as ProjectSearchSuggestions;
 use App\Models\Role;
 use App\Models\Idea;
+use Laravel\Cashier\Subscription;
 
 /**
  * Class ProjectRepository
@@ -180,5 +181,14 @@ class ProjectRepository
         $projectData['inspirations']   = $project->client->inspirations;
         $projectData['metadata']       = $project->metaToView();
         return $projectData;
+    }
+
+    /**
+     * @param $subscriptionIds
+     * @return Project[]|\Illuminate\Database\Eloquent\Collection
+     */
+    public function projectsWhereSubscriptionIdsIn($subscriptionIds)
+    {
+        return Project::whereIn('subscription_id', $subscriptionIds)->get();
     }
 }

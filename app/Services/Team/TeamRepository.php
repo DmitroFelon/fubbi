@@ -27,16 +27,11 @@ class TeamRepository
             case 'admin':
                 $teams = Team::with('users')->get();
                 break;
-            case 'client':
-                $teams = $user->teams()->with('users')->get();
-                if ($teams->isEmpty()) {
-                    return $teams;
-                }
-                break;
             default:
                 $teams = $user->teams()->with('users')->get();
                 break;
         }
+
         return $teams;
     }
 

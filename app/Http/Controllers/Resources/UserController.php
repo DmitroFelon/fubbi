@@ -55,7 +55,7 @@ class UserController extends Controller
     {
         $this->userManager->create($user, $request->input());
 
-        return redirect()->action('Resources\UserController@index')->with('success', 'User has been created successfully');
+        return redirect()->route('users.index')->with('success', 'User has been created successfully');
     }
 
     /**
@@ -70,7 +70,7 @@ class UserController extends Controller
 
         return $request->has('redirect_to_last_project') && $user->projects()->latest('id')->first()
             ? redirect()
-                    ->action('Resources\ProjectController@edit', [
+                    ->route('projects.edit', [
                         $user->projects()->latest('id')->first(),
                         's' => ProjectStates::QUIZ_FILLING
                     ])

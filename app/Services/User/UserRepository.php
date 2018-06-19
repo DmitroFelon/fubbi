@@ -60,4 +60,13 @@ class UserRepository
     {
         return User::withTrashed()->findOrFail($id);
     }
+
+    /**
+     * @param array $ids
+     * @return User[]|\Illuminate\Database\Eloquent\Collection
+     */
+    public function findByIds(array $ids)
+    {
+        return User::whereIn('id', $ids)->get();
+    }
 }

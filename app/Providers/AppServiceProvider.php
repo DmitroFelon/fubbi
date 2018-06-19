@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Article;
 use App\Models\Invite;
 use App\Models\Project;
+use App\Models\Team;
 use App\Observers\ArticleObserver;
 use App\Observers\InviteObserver;
 use App\Observers\MessageObserver;
@@ -21,6 +22,7 @@ use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
 use Musonza\Chat\Messages\Message;
 use Psr\Log\LoggerInterface;
+use App\Policies\TeamPolicy;
 
 /**
  * Class AppServiceProvider
@@ -116,7 +118,5 @@ class AppServiceProvider extends ServiceProvider
             $this->app->alias('bugsnag.logger', Log::class);
             $this->app->alias('bugsnag.logger', LoggerInterface::class);
         }
-
-
     }
 }

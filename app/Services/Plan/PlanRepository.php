@@ -1,17 +1,11 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: user
- * Date: 07.06.18
- * Time: 15:19
- */
 
 namespace App\Services\Plan;
 
+use App\Services\Project\ProjectRepository;
+use App\Services\Subscription\SubscriptionRepository;
 use Illuminate\Support\Facades\Cache;
 use Stripe\Plan;
-use Laravel\Cashier\Subscription;
-use App\Models\Project;
 
 /**
  * Class PlanRepository
@@ -20,41 +14,52 @@ use App\Models\Project;
 class PlanRepository
 {
     /**
+     * @var ProjectRepository
+     */
+    protected $projectRepository;
+
+    /**
+     * @var SubscriptionRepository
+     */
+    protected $subscriptionRepository;
+
+    /**
+     * PlanRepository constructor.
+     * @param ProjectRepository $projectRepository
+     * @param SubscriptionRepository $subscriptionRepository
+     */
+    public function __construct(
+        ProjectRepository $projectRepository,
+        SubscriptionRepository $subscriptionRepository
+    )
+    {
+        $this->projectRepository = $projectRepository;
+        $this->subscriptionRepository = $subscriptionRepository;
+    }
+
+    /**
      * @return mixed
      */
     public function plans()
     {
         $plans = Cache::remember('public_plans', 1440, function () {
             $filtered_plans = collect();
-            foreach (Plan::all()->data as $plan) {
+            foreach ($this->subscriptionRepository->allPlans() as $plan) {
                 $filtered_plans->push($plan);
             }
+
             return $filtered_plans;
-        }
-        );
-        $plans->each(
-            function (Plan $plan, $i) {
-                $plan->meta     = $plan->metadata->jsonSerialize();
-                $plan->projects = Subscription::where('stripe_plan', $plan->id)->count();
-            }
-        );
+        });
+
         return $plans;
     }
 
     /**
      * @param $id
-     * @return mixed
+     * @return Plan
      */
-    public function plan($id)
+    public function planById($id)
     {
-        $plan = Plan::retrieve($id);
-        $data['nickname'] = $plan->nickname;
-        $data['id'] = $plan->id;
-        $data['meta'] = collect($plan->metadata->jsonSerialize());
-        $data['projects'] = Project::whereIn(
-            'subscription_id',
-            Subscription::select('id')->where('stripe_plan', $plan->id)->get()
-        )->get();
-        return $data;
+        return Plan::retrieve($id);
     }
 }

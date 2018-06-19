@@ -8,6 +8,7 @@
 
 namespace App\Services\Team;
 
+use App\Services\User\UserRepository;
 use App\User;
 use App\Models\Team;
 
@@ -18,14 +19,29 @@ use App\Models\Team;
 class TeamManager
 {
     /**
+     * @var UserRepository
+     */
+    protected $userRepository;
+
+    /**
+     * TeamManager constructor.
+     * @param UserRepository $userRepository
+     */
+    public function __construct(UserRepository $userRepository)
+    {
+        $this->userRepository = $userRepository;
+    }
+
+    /**
      * @param Team $team
      * @param array $params
      */
-    public function updateTeam(Team $team, array $params)
+    public function update(Team $team, array $params)
     {
         $team->update($params);
         if (array_key_exists('users', $params)) {
-            $this->inviteUsers($team, $params);
+            $users = $this->getUsers($params['users']);
+            $this->inviteUsers($team, $users);
         }
     }
 
@@ -33,23 +49,43 @@ class TeamManager
      * @param Team $team
      * @param array $params
      */
-    public function createTeam(Team $team, array $params)
+    public function create(Team $team, array $params)
     {
         $team->fill($params);
         $team->save();
         if (array_key_exists('users', $params)) {
-            $this->inviteUsers($team, $params);
+            $users = $this->getUsers($params['users']);
+            $this->inviteUsers($team, $users);
         }
     }
 
     /**
      * @param Team $team
-     * @param array $params
+     * @throws \Exception
      */
-    protected function inviteUsers(Team $team, array $params)
+    public function delete(Team $team)
     {
-        $ids   = array_keys($params['users']);
-        $users = User::whereIn('id', $ids)->get();
+        $team->delete();
+    }
+
+    /**
+     * @param array $params
+     * @return User[]|\Illuminate\Database\Eloquent\Collection
+     */
+    protected function getUsers(array $params)
+    {
+        $ids   = array_keys($params);
+        $users = $this->userRepository->findByIds($ids);
+
+        return $users;
+    }
+
+    /**
+     * @param Team $team
+     * @param $users
+     */
+    protected function inviteUsers(Team $team, $users)
+    {
         $users->each(function (User $user) use ($team) {
             $user->inviteTo($team);
         });

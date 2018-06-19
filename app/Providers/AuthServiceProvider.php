@@ -13,7 +13,6 @@ use App\Policies\UserPolicy;
 use App\User;
 use Illuminate\Contracts\Auth\Access\Gate as GateContract;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Gate;
 use Stripe\Charge;
 use Stripe\Plan;
 
@@ -64,8 +63,5 @@ class AuthServiceProvider extends ServiceProvider
          * User Policy
          * */
         $gate->define('user.show', UserPolicy::class . '@show');
-        $gate->define('user.apply_to_project', UserPolicy::class . '@apply_to_project');
-
-
     }
 }

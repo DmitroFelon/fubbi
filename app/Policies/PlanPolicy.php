@@ -5,45 +5,19 @@ namespace App\Policies;
 use App\Models\Role;
 use App\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Stripe\Plan;
 
 class PlanPolicy
 {
     use HandlesAuthorization;
 
-    public function __construct()
-    {
-        return true;
-    }
-
+    /**
+     * @param User $user
+     * @return bool
+     */
     public function index(User $user)
     {
-        $allow = [
-            Role::ADMIN
-        ];
-
-
-        return (in_array($user->role, $allow));
+        return $user->role == Role::ADMIN
+            ? true
+            : false;
     }
-
-    public function show(User $user)
-    {
-        $allow = [
-            Role::ADMIN
-        ];
-
-
-        return (in_array($user->role, $allow));
-    }
-
-    public function update(User $user)
-    {
-        $allow = [
-            Role::ADMIN
-        ];
-
-
-        return (in_array($user->role, $allow));
-    }
-
 }
