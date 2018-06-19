@@ -3,8 +3,9 @@
 namespace App\Services\Invitations\Services;
 
 use App\Services\Invitations\Interfaces\InviteInterface;
-use App\Services\Invitations\ResponseDTO;
+use App\Services\Response\ResponseDTO;
 use App\User;
+use App\Models\Traits\ResponseMessage;
 
 /**
  * Class Invite
@@ -12,18 +13,7 @@ use App\User;
  */
 abstract class Invite implements InviteInterface
 {
-    /**
-     * @var ResponseDTO
-     */
-    protected $response;
-
-    /**
-     * Invite constructor.
-     */
-    public function __construct()
-    {
-        $this->response = new ResponseDTO();
-    }
+    use ResponseMessage;
 
     /**
      * @param $inviteFrom
@@ -50,7 +40,7 @@ abstract class Invite implements InviteInterface
 
         return $this->acceptInvite($invite)
             ? $this->attachUser($inviteFrom, $user->id)
-            : $this->makeResponseMessage('The invitation hasn\'t been found.', 'error');
+            : $this->make('The invitation hasn\'t been found.', 'error');
     }
 
     /**
@@ -63,8 +53,8 @@ abstract class Invite implements InviteInterface
         $invite = $this->getInvite($user, $inviteFrom->id);
 
         return $this->declineInvite($invite)
-            ? $this->makeResponseMessage('The invitation has been successfully declined.', 'info')
-            : $this->makeResponseMessage('The invitation hasn\'t been found.', 'error');
+            ? $this->make('The invitation has been successfully declined.', 'info')
+            : $this->make('The invitation hasn\'t been found.', 'error');
     }
 
     /**
@@ -95,18 +85,5 @@ abstract class Invite implements InviteInterface
         }
 
         return false;
-    }
-
-    /**
-     * @param string $message
-     * @param string $status
-     * @return ResponseDTO
-     */
-    protected function makeResponseMessage(string $message, string $status)
-    {
-        $this->response->message = $message;
-        $this->response->status = $status;
-
-        return $this->response;
     }
 }

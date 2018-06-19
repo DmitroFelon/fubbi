@@ -12,11 +12,15 @@ class ChangeEmail extends Notification
     use Queueable;
 
     /**
-     * Create a new notification instance.
-     *
-     * @return void
+     * @var string
      */
-    public function __construct($token)
+    protected $token;
+
+    /**
+     * ChangeEmail constructor.
+     * @param $token
+     */
+    public function __construct(string $token)
     {
         $this->token = $token;
     }
@@ -44,7 +48,6 @@ class ChangeEmail extends Notification
             ->line('You are receiving this email because we received a email reset request for your account.')
             ->action('Reset Email', url(config('app.url').route('resetEmail', $this->token, false)))
             ->line('If you did not request a email reset, no further action is required.');
-
     }
 
     /**

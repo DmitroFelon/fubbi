@@ -14,13 +14,13 @@ class ProjectInvite extends Invite implements ProjectInviteInterface
     /**
      * @param $inviteFrom
      * @param $userId
-     * @return \App\Services\Invitations\ResponseDTO|mixed
+     * @return \App\Services\Response\ResponseDTO|mixed
      */
     protected function attachUser($inviteFrom, $userId)
     {
         $inviteFrom->attachWorker($userId);
 
-        return $this->makeResponseMessage('The invitation has been successfully accepted!', 'success');
+        return $this->make('The invitation has been successfully accepted!', 'success');
     }
 
     /**

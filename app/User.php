@@ -147,6 +147,11 @@ class User extends Authenticatable implements HasMedia
      */
     protected $appends = ['role'];
 
+    public function setPasswordAttribute($password)
+    {
+        $this->attributes['password'] = bcrypt($password);
+    }
+
     /**
      * @return mixed
      */
@@ -158,16 +163,6 @@ class User extends Authenticatable implements HasMedia
         }
         return $this->metaData->sortByDesc('id')
             ->take(count($metas));
-    }
-
-    /**
-     * @param $email
-     * @param $token
-     */
-    public function resetEmail($email, $token)
-    {
-        User::where('email', '=', $this->email)->update(['email' => $email]);
-        DB::table('reset_email')->where('token', $token)->delete();
     }
 
     /**

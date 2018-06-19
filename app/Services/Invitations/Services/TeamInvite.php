@@ -14,13 +14,13 @@ class TeamInvite extends Invite implements TeamInviteInterface
     /**
      * @param $inviteFrom
      * @param $userId
-     * @return \App\Services\Invitations\ResponseDTO|mixed
+     * @return \App\Services\Response\ResponseDTO|mixed
      */
     protected function attachUser($inviteFrom, $userId)
     {
         $inviteFrom->users()->attach($userId);
 
-        return $this->makeResponseMessage('The invitation has benn successfully accepted!', 'success');
+        return $this->make('The invitation has been successfully accepted!', 'success');
     }
 
     /**

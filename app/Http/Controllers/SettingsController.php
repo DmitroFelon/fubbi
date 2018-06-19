@@ -14,7 +14,21 @@ use Illuminate\Support\Facades\Auth;
 class SettingsController extends Controller
 {
     /**
-     * @return mixed
+     * @var UserManager
+     */
+    protected $userManager;
+
+    /**
+     * SettingsController constructor.
+     * @param UserManager $userManager
+     */
+    public function __construct(UserManager $userManager)
+    {
+        $this->userManager = $userManager;
+    }
+
+    /**
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function index()
     {
@@ -22,30 +36,29 @@ class SettingsController extends Controller
             'notifications_checkboxes' => NotificationTypes::get(Auth::user()->role),
             'user'                     => Auth::user(),
         ];
+
         return view('entity.user.settings', $data);
     }
 
     /**
      * @param Request $request
-     * @param UserManager $userManager
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function save(Request $request, UserManager $userManager)
+    public function save(Request $request)
     {
-        $userManager->notifications($request->user(), $request->input());
+        $this->userManager->notificationsUpdate($request->user(), $request->input());
+
         return redirect()->back()->with('success', _i('Notification options have been saved'));
     }
 
     /**
      * @param Request $request
-     * @param UserManager $userManager
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function billing(Request $request, UserManager $userManager)
+    public function billing(Request $request)
     {
-        if ($request->input('stripeToken')) {
-            $userManager->billing($request->user(), $request->input());
-        }
-        return back()->with('error', 'Something wrong happened while billing info updating, please try later.');
+        $response = $this->userManager->billingUpdate($request->user(), $request->input());
+
+        return back()->with($response->status, $response->message);
     }
 }

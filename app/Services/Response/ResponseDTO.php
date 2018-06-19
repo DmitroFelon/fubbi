@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Invitations;
+namespace App\Services\Response;
 
 
 class ResponseDTO

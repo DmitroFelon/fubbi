@@ -39,4 +39,13 @@ class TeamRepository
         }
         return $teams;
     }
+
+    /**
+     * @param $params
+     * @return Team|Team[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model|null
+     */
+    public function findTeam($params)
+    {
+        return Team::find($params);
+    }
 }

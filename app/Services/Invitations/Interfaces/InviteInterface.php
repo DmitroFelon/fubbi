@@ -2,7 +2,7 @@
 
 namespace App\Services\Invitations\Interfaces;
 
-use App\Services\Invitations\ResponseDTO;
+use App\Services\Response\ResponseDTO;
 use App\User;
 
 /**

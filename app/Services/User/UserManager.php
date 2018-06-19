@@ -2,14 +2,13 @@
 
 namespace App\Services\User;
 
+use App\Services\Team\TeamRepository;
 use App\User;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Notifications\ChangeEmail;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
-use App\Models\Team;
-use App\Models\Helpers\ProjectStates;
+use App\Models\Traits\ResponseMessage;
 
 /**
  * Class UserManager
@@ -17,153 +16,191 @@ use App\Models\Helpers\ProjectStates;
  */
 class UserManager
 {
+    use ResponseMessage;
+
+    /**
+     * @var TeamRepository
+     */
+    protected $teamRepository;
+
+    /**
+     * @var UserRepository
+     */
+    protected $userRepository;
+
+    /**
+     * UserManager constructor.
+     * @param TeamRepository $teamRepository
+     * @param UserRepository $userRepository
+     */
+    public function __construct(
+        TeamRepository $teamRepository,
+        UserRepository $userRepository
+    )
+    {
+        $this->teamRepository = $teamRepository;
+        $this->userRepository = $userRepository;
+    }
+
     /**
      * @param User $user
-     * @return \Illuminate\Http\RedirectResponse
+     * @param array $params
      */
-    public function resetEmailData(User $user)
+    public function create(User $user, array $params)
     {
+        $user->fill($params);
+        $user->save();
+        $this->setRole($user, $params['role']);
+        if (! is_null($params['team'])) {
+            $team = $this->teamRepository->findTeam($params['team']);
+            $this->attachTeam($user, $team);
+        }
+    }
+
+    /**
+     * @param $userId
+     * @param $currentUserId
+     * @return \App\Services\Response\ResponseDTO
+     */
+    public function blockOrRestore($userId, $currentUserId)
+    {
+        if ($currentUserId == $userId) {
+
+            return $this->make('You can\'t block yourself', 'error');
+        }
+        $user = $this->userRepository->findById($userId);
+        if ($user->trashed()) {
+            $user->restore();
+
+            return $this->make($user->name . ' has been restored', 'success');
+        }
+        $user->delete();
+
+        return $this->make($user->name . ' has been blocked', 'success');
+    }
+
+    /**
+     * @param User $user
+     * @param array $params
+     * @return \App\Services\Response\ResponseDTO
+     */
+    public function update(User $user, array $params)
+    {
+        $user->fill($params);
+        $user->setMetaArray($params);
+        $user->save();
+
+        return $this->make('Profile has been saved successfully', 'success');
+    }
+
+    /**
+     * @param User $user
+     * @param $email
+     * @return \App\Services\Response\ResponseDTO
+     */
+    public function resetEmailDataCreate(User $user, $email)
+    {
+        $token = Str::random(60);
         try {
-            $token = Str::random(60);
             DB::table('reset_email')->insert([
-                'email' => $user->email,
-                'token' => $token,
+                'email'      => $email,
+                'token'      => $token,
                 'created_at' => Carbon::now()
             ]);
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Such email has been already requested!');
+
+            return $this->make('Such email has been already requested!', 'error');
         }
         $user->notify(new ChangeEmail($token));
+
+        return $this->make('We have e-mailed your email reset link!', 'success');
     }
 
     /**
      * @param User $user
      * @param $data
      * @param $token
-     * @return \Illuminate\Http\RedirectResponse
+     * @return \App\Services\Response\ResponseDTO
      */
-    public function resetEmail(User $user, $data, $token)
+    public function changeEmail(User $user, $data, $token)
     {
         try {
-            $user->resetEmail($data->email, $token);
+            $this->updateEmail($user, $data->email, $token);
         } catch (\Exception $e) {
             DB::table('reset_email')->where('token', $token)->delete();
-            return redirect()->back()->with('error', 'Such email has been already taken!');
+
+            return $this->make('Such email has been already taken!', 'error');
         }
+
+        return $this->make('Your email was successfully changed!', 'success');
+    }
+
+    /**
+     * @param User $user
+     * @param $email
+     * @param $token
+     */
+    protected function updateEmail(User $user, $email, $token)
+    {
+        User::where('email', '=', $user->email)->update(['email' => $email]);
+        DB::table('reset_email')->where('token', $token)->delete();
     }
 
     /**
      * @param User $user
      * @param array $params
      */
-    public function notifications(User $user, array $params)
+    public function notificationsUpdate(User $user, array $params)
     {
         $disabled_notifications = array_key_exists('disabled_notifications', $params)
             ? $params['disabled_notifications']
             : [];
         $disabled_notifications = collect(array_keys($disabled_notifications))->transform(function ($disabled_notification) {
+
             return ['name' => $disabled_notification];
         });
-        $user->disabled_notifications()->delete();
-        $user->disabled_notifications()->createMany(
-            $disabled_notifications->toArray()
-        );
+        $user->disabled_notifications()
+            ->delete();
+        $user->disabled_notifications()
+            ->createMany($disabled_notifications->toArray());
     }
 
     /**
      * @param User $user
      * @param array $params
-     * @return \Illuminate\Http\RedirectResponse
+     * @return \App\Services\Response\ResponseDTO
      */
-    public function billing(User $user, array $params)
+    public function billingUpdate(User $user, array $params)
     {
-        try {
-            if (!is_null($user->stripe_id)) {
-                try {
-                    $user->updateCard($params['stripeToken']);
-                } catch (\Exception $e) {
-                    return back()->with('error', 'Something wrong happened while billing info updating, please try later.');
-                }
-                return redirect()->back()->with(
-                    'success', _i('Card has been updated Successfully')
-                );
-            }
-            else {
-                $user->createAsStripeCustomer($params['stripeToken']);
-                return redirect()->back()->with(
-                    'success', _i('Card has been created Successfully')
-                );
-            }
-        } catch (\Stripe\Error\Card $e) {
-            $body  = $e->getJsonBody();
-            $error = $body['error'];
-            return redirect()->back()->with(
-                'error', $error['message']
-            );
+        if (! is_null($user->stripe_id)) {
+            $user->updateCard($params['stripeToken']);
+
+            return $this->make('Card has been updated Successfully.', 'success');
+        }
+        else {
+            $user->createAsStripeCustomer($params['stripeToken']);
+
+            return $this->make('Card has been created Successfully.', 'success');
         }
     }
 
     /**
      * @param User $user
-     * @param array $params
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @param $role
      */
-    public function userCreate(User $user, array $params)
+    protected function setRole(User $user, $role)
     {
-        $user->fill($params);
-        $user->password = bcrypt($params['password']);
+        $user->roles()->attach($role);
         $user->save();
-        $user->roles()->attach($params['role']);
-        $user->save();
-        if (array_key_exists('team', $params) and $params['team'] > 0) {
-            $team = Team::find($params['team']);
-            if ($team) {
-                $user->teams()->attach($team);
-            }
-        }
-        Cache::set('temp_password_' . $user->id, $params['password']);
     }
 
     /**
      * @param User $user
-     * @param array $params
-     * @return \Illuminate\Http\RedirectResponse
+     * @param $team
      */
-    public function userUpdate(User $user, array $params)
+    protected function attachTeam(User $user, $team)
     {
-        $user->fill($params);
-        if ($params['password']) {
-            $user->password = bcrypt($params['password']);
-        }
-        $user->setMetaArray($params);
+        $user->teams()->attach($team);
         $user->save();
-        if (array_key_exists('redirect_to_last_project', $params)) {
-            $last_project = $user->projects()->latest('id')->first();
-            if ($last_project) {
-                return redirect()
-                    ->action('Resources\ProjectController@edit', [$last_project, 's' => ProjectStates::QUIZ_FILLING])
-                    ->with('success', _i('Please, fill the quiz.'));
-            }
-        }
-        return redirect()->back()->with('success', _i('Profile has been saved successfully'));
-    }
-
-    /**
-     * @param $userId
-     * @param $currentUserId
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function blockOrRestore($userId, $currentUserId)
-    {
-        if ($currentUserId == $userId) {
-            return redirect()->back()->with('error', "You can't block yourself");
-        }
-        $user = User::withTrashed()->find($userId);
-        if ($user->trashed()) {
-            $user->restore();
-            return redirect()->back()->with('success', $user->name . ' has been restored');
-        }
-        $user->delete();
-        return redirect()->back()->with('success', $user->name . ' has been blocked');
     }
 }

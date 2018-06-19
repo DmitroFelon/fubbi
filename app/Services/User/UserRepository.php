@@ -43,4 +43,21 @@ class UserRepository
     {
         return User::search($params)->first();
     }
+
+    /**
+     * @return mixed
+     */
+    public function getAllUsers()
+    {
+        return User::withTrashed()->get();
+    }
+
+    /**
+     * @param $id
+     * @return mixed
+     */
+    public function findById($id)
+    {
+        return User::withTrashed()->findOrFail($id);
+    }
 }

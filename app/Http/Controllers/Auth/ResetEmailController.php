@@ -16,34 +16,59 @@ use App\Http\Controllers\Controller;
 class ResetEmailController extends Controller
 {
     /**
-     * @param ResetEmailRequest $request
+     * @var UserManager
+     */
+    protected $userManager;
+
+    /**
+     * @var UserRepository
+     */
+    protected $userRepository;
+
+    /**
+     * ResetEmailController constructor.
      * @param UserManager $userManager
+     * @param UserRepository $userRepository
+     */
+    public function __construct(
+        UserManager $userManager,
+        UserRepository $userRepository
+    )
+    {
+        $this->userManager = $userManager;
+        $this->userRepository = $userRepository;
+    }
+
+    /**
+     * @param ResetEmailRequest $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function sendEmail(ResetEmailRequest $request, UserManager $userManager)
+    public function sendEmail(ResetEmailRequest $request)
     {
         if (Hash::check($request->input('password'), $request->user()->password))
         {
-            $userManager->resetEmailData($request->user());
-            return redirect()->back()->with('success', 'We have e-mailed your email reset link!');
+            $response = $this->userManager->resetEmailDataCreate($request->user(), $request->input('email'));
+
+            return redirect()->back()->with($response->status, $response->message);
         }
+
         return redirect()->back()->with('error', 'Wrong password!');
     }
 
     /**
      * @param Request $request
      * @param $token
-     * @param UserRepository $userRepository
-     * @param UserManager $userManager
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function reset(Request $request, $token, UserRepository $userRepository, UserManager $userManager)
+    public function reset(Request $request, $token)
     {
-        $data = $userRepository->findByResetToken($token);
-        if (!is_null($data)) {
-            $userManager->resetEmail($request->user(), $data, $token);
-            return redirect()->route('settings')->with('success', 'Your email was successfully changed!');
+        $data = $this->userRepository->findByResetToken($token);
+        if (! is_null($data)) {
+            $response = $this->userManager->changeEmail($request->user(), $data, $token);
+
+            return redirect()->route('settings')->with($response->status, $response->message);
         }
+
         return redirect()->route('settings')->with('error', 'Something went wrong!');
     }
 }
