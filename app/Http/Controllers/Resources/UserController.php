@@ -79,12 +79,12 @@ class UserController extends Controller
     }
 
     /**
-     * @param User $user
+     * @param $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(User $user)
+    public function destroy($id)
     {
-        $response = $this->userManager->blockOrRestore($user->id, Auth::user()->id);
+        $response = $this->userManager->blockOrRestore($id, Auth::user()->id);
 
         return redirect()->back()->with($response->status, $response->message);
     }

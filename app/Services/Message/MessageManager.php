@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: user
- * Date: 01.06.18
- * Time: 12:53
- */
 
 namespace App\Services\Message;
 
@@ -19,8 +13,14 @@ use App\Services\User\UserRepository;
  */
 class MessageManager
 {
+    /**
+     * @var UserRepository
+     */
     protected $userRepository;
 
+    /**
+     * MessageManager constructor.
+     */
     public function __construct()
     {
         $this->userRepository = new UserRepository();

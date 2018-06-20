@@ -163,6 +163,13 @@ class Project extends Model implements HasMediaConversions, Invitable
      */
     protected $with = ['client', 'metas'];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::addGlobalScope(new App\Scopes\ProjectScope());
+    }
+
     /**
      * Project's owner
      *

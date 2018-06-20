@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: user
- * Date: 01.06.18
- * Time: 12:17
- */
 
 namespace App\Services\Issue;
 
@@ -30,7 +24,25 @@ class IssueManager
         $issue->state = Issue::STATE_CREATED;
         $issue->save();
         $issue = $this->attachTags($issue, $params);
+
         return $issue;
+    }
+
+    /**
+     * @param Issue $issue
+     * @throws \Exception
+     */
+    public function delete(Issue $issue)
+    {
+        $issue->delete();
+    }
+
+    /**
+     * @param Issue $issue
+     */
+    public function update(Issue $issue)
+    {
+        $issue->update(['state' => Issue::STATE_FIXED]);
     }
 
     /**
@@ -45,6 +57,7 @@ class IssueManager
             $issue->attachTagsHelper($tag);
         });
         $issue->save();
+
         return $issue;
     }
 }

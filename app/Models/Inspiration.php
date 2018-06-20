@@ -47,6 +47,7 @@ class Inspiration extends Model implements HasMediaConversions
 
     /**
      * @param Media|null $media
+     * @throws \Spatie\Image\Exceptions\InvalidManipulation
      */
     public function registerMediaConversions(Media $media = null)
     {
@@ -57,6 +58,7 @@ class Inspiration extends Model implements HasMediaConversions
     /**
      * @param Media $media
      * @return string
+     * @throws \Spatie\MediaLibrary\Exceptions\InvalidConversion
      */
     public function prepareMediaConversion(Media $media)
     {

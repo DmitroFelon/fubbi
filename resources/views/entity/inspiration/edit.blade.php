@@ -91,11 +91,6 @@
                     success: dropzone_success,
                     removedfile: dropzone_removedfile
                 });
-                dropzone.on("addedfile", function (file) {
-                    file.previewTemplate.addEventListener("click", function () {
-                        window.open(file.url, '_blank')
-                    });
-                });
             });
 
             function dropzone_init() {

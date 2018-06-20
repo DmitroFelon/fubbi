@@ -16,17 +16,116 @@ use App\Services\Inspiration\InspirationManager;
 class InspirationController extends Controller
 {
     /**
-     * @var Inspiration
+     * @var InspirationManager
      */
-    protected $inspiration;
+    protected $inspirationManager;
+
+    /**
+     * @var InspirationRepository
+     */
+    protected $inspirationRepository;
 
     /**
      * InspirationController constructor.
-     * @param Inspiration $inspiration
+     * @param InspirationManager $inspirationManager
+     * @param InspirationRepository $inspirationRepository
      */
-    public function __construct(Inspiration $inspiration)
+    public function __construct(
+        InspirationManager $inspirationManager,
+        InspirationRepository $inspirationRepository
+    )
     {
-        $this->inspiration = $inspiration;
+        $this->inspirationManager = $inspirationManager;
+        $this->inspirationRepository = $inspirationRepository;
+    }
+
+    /**
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function create()
+    {
+        return redirect()->route('inspirations.edit', $this->inspirationManager->create(Auth::user()));
+    }
+
+    /**
+     * @param Request $request
+     * @param Inspiration $inspiration
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function update(Request $request, Inspiration $inspiration)
+    {
+        $this->inspirationManager->update($inspiration, $request->except(['_method', '_token']));
+
+        return
+            redirect()
+            ->route('inspirations.index')
+            ->with('success', 'Idea has been saved');
+    }
+
+    /**
+     * @param Inspiration $inspiration
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception
+     */
+    public function destroy(Inspiration $inspiration)
+    {
+        $this->inspirationManager->delete($inspiration);
+
+        return
+            redirect()
+            ->route('inspirations.index')
+            ->with('info', 'Idea has been deleted');
+    }
+
+    /**
+     * @param Request $request
+     * @param Inspiration $inspiration
+     * @param $collection
+     * @return \Illuminate\Http\JsonResponse|null
+     */
+    public function storeFile(Request $request, Inspiration $inspiration, $collection)
+    {
+        if (! $request->hasFile('files')) {
+
+            return null;
+        }
+        try {
+            $response = $this->inspirationManager->storeFile($request->file('files'), $inspiration, $collection);
+        } catch (\Exception $e) {
+
+            return response()->json($e->getMessage(), 500);
+        }
+
+        return response()->json([$response], 200);
+    }
+
+    /**
+     * @param Inspiration $inspiration
+     * @param $collection
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getFiles(Inspiration $inspiration, $collection)
+    {
+        return response()
+            ->json(
+                $this->inspirationRepository
+                    ->getFiles($inspiration, $collection)
+                    ->filter()
+                    ->toArray(),
+                200
+            );
+    }
+
+    /**
+     * @param Inspiration $inspiration
+     * @param $file_id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function removeFile(Inspiration $inspiration, $file_id)
+    {
+        $inspiration->media()->findOrFail($file_id)->delete();
+
+        return response()->json('success', 200);
     }
 
     /**
@@ -40,100 +139,20 @@ class InspirationController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @param Inspiration $inspiration
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function create()
+    public function show(Inspiration $inspiration)
     {
-        return redirect()->route('inspirations.edit', Auth::user()->inspirations()->create());
+        return view('entity.inspiration.show', ['inspiration' => $inspiration]);
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
+     * @param Inspiration $inspiration
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function show($id)
+    public function edit(Inspiration $inspiration)
     {
-        return view('entity.inspiration.show', ['inspiration' => $this->inspiration->findOrFail($id)]);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        return view('entity.inspiration.edit', ['inspiration' => $this->inspiration->findOrFail($id)]);
-    }
-
-    /**
-     * @param Request $request
-     * @param $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function update(Request $request, $id)
-    {
-        $this->inspiration->findOrFail($id)->update($request->except(['_method', '_token']));
-        return redirect()->route('inspirations.index')->with('success', 'Idea has been saved');
-    }
-
-    /**
-     * @param $id
-     * @return \Illuminate\Http\RedirectResponse
-     * @throws \Exception
-     */
-    public function destroy($id)
-    {
-        Auth::user()->inspirations()->findOrFail($id)->delete();
-        return redirect()->route('inspirations.index')->with('info', 'Idea has been deleted');
-    }
-
-    /**
-     * @param Request $request
-     * @param $id
-     * @param $collection
-     * @param InspirationManager $inspirationManager
-     * @return \Illuminate\Http\JsonResponse|null
-     */
-    public function storeFile(Request $request, $id, $collection, InspirationManager $inspirationManager)
-    {
-        if (!$request->hasFile('files')) {
-            return null;
-        }
-
-        return response()->json([$inspirationManager->storeFile(
-                $request->user(),
-                $request->file('files'),
-                $this->inspiration,
-                $id,
-                $collection)], 200);
-    }
-
-    /**
-     * @param $id
-     * @param $collection
-     * @param InspirationRepository $inspirationRepository
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function getFiles($id, $collection, InspirationRepository $inspirationRepository)
-    {
-        $files = $inspirationRepository->getFiles($this->inspiration, $id, $collection);
-        return response()->json($files->filter()->toArray(), 200);
-    }
-
-    /**
-     * @param $id
-     * @param $file_id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function removeFile($id, $file_id)
-    {
-        Auth::user()->inspirations()->findOrFail($id)->media()->findOrFail($file_id)->delete();
-        return response()->json('success', 200);
+        return view('entity.inspiration.edit', ['inspiration' => $inspiration]);
     }
 }

@@ -19,6 +19,20 @@ use App\Models\Role;
 class MessageRepository
 {
     /**
+     * @var SearchSuggestion
+     */
+    protected $searchSuggestion;
+
+    /**
+     * MessageRepository constructor.
+     * @param SearchSuggestion $searchSuggestion
+     */
+    public function __construct(SearchSuggestion $searchSuggestion)
+    {
+        $this->searchSuggestion = $searchSuggestion;
+    }
+
+    /**
      * @param User $user
      * @param $conversation
      * @param $id
@@ -26,41 +40,37 @@ class MessageRepository
      */
     public function conversationById(User $user, $conversation, $id)
     {
-        if (!$conversation->users()->where('users.id', $user->id)->first()) {
+        if (! $conversation->users()->where('users.id', $user->id)->first()) {
+
             return ['error'];
         }
         $conversation->readAll($user);
-        $userSuggestions = SearchSuggestion::toView($conversation);
-        $messages = $conversation->messages()->orderBy('id', 'desc')->take(50)->get()->reverse();
         $data = [
-            'chat_messages'   => $messages,
-            'participants'    => $conversation->users,
             'conversation'    => $id,
-            'userSuggestions' => $userSuggestions,
+            'participants'    => $conversation->users,
+            'userSuggestions' => $this->searchSuggestion->toView($conversation),
+            'chat_messages'   => $conversation->messages()->orderBy('id', 'desc')->take(50)->get()->reverse(),
         ];
+
         return $data;
     }
 
     /**
      * @param User $user
      * @param Chat $chat
-     * @param array $params
-     * @return \Illuminate\Database\Eloquent\Collection|\Illuminate\Http\RedirectResponse|\Illuminate\Support\Collection|mixed|\Musonza\Chat\Conversations\Conversation[]
+     * @return mixed
      */
-    public function conversations(User $user, Chat $chat, array $params)
+    public function conversations(User $user, Chat $chat)
     {
         $conversations = $user->conversations;
         if ($user->role == Role::ADMIN) {
             $conversations = $this->adminConversations($chat, $conversations, $user);
         }
         $conversations = $conversations->unique();
-        if ($conversations->count() == 1 and !array_key_exists('c', $params)) {
-            return redirect()->action('Resources\MessageController@index', ['c' => $conversations->first()->id]);
-        }
-        return view('entity.chat.index', [
-            'conversations'     => $conversations,
-            'has_conversations' => $conversations
-        ]);
+        $data['conversations'] = $conversations;
+        $data['has_conversations'] = $conversations->isNotEmpty();
+
+        return $data;
     }
 
     /**
@@ -74,14 +84,16 @@ class MessageRepository
         $users = User::all();
         $users->each(function (User $user) use ($chat, $conversations, $currentUser) {
             if ($user->id == $currentUser->id) {
+
                 return;
             }
             $conversation = $chat->getConversationBetween($user->id, $currentUser->id);
-            if (!$conversation) {
+            if (! $conversation) {
                 $conversation = $this->createConversation($chat, $user, $currentUser);
             }
             $conversations->push($conversation);
         });
+
         return $conversations;
     }
 
@@ -100,7 +112,7 @@ class MessageRepository
                 'title-' . $currentUser->id => $user->name
             ]
         ]);
-        $conversation->save();
+
         return $conversation;
     }
 }

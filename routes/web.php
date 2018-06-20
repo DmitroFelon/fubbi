@@ -178,9 +178,9 @@ Route::middleware(['auth'])->group(function () {
         });
 
         Route::prefix('inspirations')->group(function () {
-            Route::get('{id}/getFiles/{collection}', 'InspirationController@getFiles');
-            Route::post('{id}/storeFile/{collection}', 'InspirationController@storeFile');
-            Route::delete('{id}/removeFile/{file_id}', 'InspirationController@removeFile');
+            Route::get('{inspiration}/getFiles/{collection}', 'InspirationController@getFiles');
+            Route::post('{inspiration}/storeFile/{collection}', 'InspirationController@storeFile');
+            Route::delete('{inspiration}/removeFile/{file_id}', 'InspirationController@removeFile');
         });
 
         Route::resources(

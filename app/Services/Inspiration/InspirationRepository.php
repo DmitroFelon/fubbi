@@ -1,17 +1,10 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: user
- * Date: 01.06.18
- * Time: 11:12
- */
 
 namespace App\Services\Inspiration;
 
 use App\Models\Inspiration;
 use App\User;
 use Spatie\MediaLibrary\Media;
-
 
 /**
  * Class InspirationRepository
@@ -33,17 +26,18 @@ class InspirationRepository
 
     /**
      * @param Inspiration $inspiration
-     * @param $id
      * @param $collection
-     * @return mixed
+     * @return \Illuminate\Support\Collection
      */
-    public function getFiles(Inspiration $inspiration, $id, $collection)
+    public function getFiles(Inspiration $inspiration, $collection)
     {
-        $files = $inspiration->findOrFail($id)->getMedia($collection);
+        $files = $inspiration->getMedia($collection);
         $files->transform(function (Media $media) use ($inspiration) {
             $media->url = $inspiration->prepareMediaConversion($media);
+
             return $media;
         });
+
         return $files;
     }
 }

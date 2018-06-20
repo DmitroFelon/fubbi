@@ -8,7 +8,6 @@ use App\Services\Message\MessageRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Musonza\Chat\Chat;
-use Musonza\Chat\Facades\ChatFacade;
 use Musonza\Chat\Notifications\MessageSent;
 use App\Events\ChatMessage;
 
@@ -19,26 +18,63 @@ use App\Events\ChatMessage;
 class MessageController extends Controller
 {
     /**
-     * @param Chat $chat
-     * @param Request $request
-     * @param MessageRepository $messageRepository
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @var Chat
      */
-    public function index(Chat $chat, Request $request, MessageRepository $messageRepository)
+    protected $chat;
+
+    /**
+     * @var MessageManager
+     */
+    protected $messageManager;
+
+    /**
+     * @var MessageRepository
+     */
+    protected $messageRepository;
+
+    /**
+     * MessageController constructor.
+     * @param Chat $chat
+     * @param MessageManager $messageManager
+     * @param MessageRepository $messageRepository
+     */
+    public function __construct(
+        Chat $chat,
+        MessageManager $messageManager,
+        MessageRepository $messageRepository
+    )
     {
-        return $messageRepository->conversations(Auth::user(), $chat, $request->input());
+        $this->chat = $chat;
+        $this->messageManager = $messageManager;
+        $this->messageRepository = $messageRepository;
     }
 
     /**
      * @param Request $request
-     * @param Chat $chat
-     * @param MessageManager $messageManager
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\RedirectResponse|\Illuminate\View\View
+     */
+    public function index(Request $request)
+    {
+        $data = $this->messageRepository->conversations($request->user(), $this->chat);
+
+        return
+            $request->has('c') &&
+            ! $request->user()->conversations()->where('id', $request->input('c'))->exists()
+                ? redirect()->route('messages.index', ['c' => $data['conversations']->first()->id])
+                : view('entity.chat.index', [
+                'conversations' => $data['conversations'],
+                'has_conversations' => $data['has_conversations']
+            ]);
+    }
+
+    /**
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request, Chat $chat, MessageManager $messageManager)
+    public function store(Request $request)
     {
         try {
-            $message = $messageManager->create($request->user(), $chat, $request->input());
+            $message = $this->messageManager->create($request->user(), $this->chat, $request->input());
             broadcast(new ChatMessage($message));
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()]);
@@ -47,13 +83,11 @@ class MessageController extends Controller
 
     /**
      * @param $id
-     * @param Chat $chat
-     * @param MessageRepository $messageRepository
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function show($id, Chat $chat, MessageRepository $messageRepository)
+    public function show($id)
     {
-        return view('entity.chat.show', $messageRepository->conversationById(Auth::user(), $chat->conversation($id), $id));
+        return view('entity.chat.show', $this->messageRepository->conversationById(Auth::user(), $this->chat->conversation($id), $id));
     }
 
     /**
@@ -62,7 +96,8 @@ class MessageController extends Controller
      */
     public function read($id)
     {
-        ChatFacade::conversation($id)->readAll(Auth::user());
+        $this->chat->conversation($id)->readAll(Auth::user());
+
         return ['read'];
     }
 
@@ -72,6 +107,7 @@ class MessageController extends Controller
     public function clear()
     {
         Auth::user()->unreadNotifications()->where('type', '=', MessageSent::class)->get()->markAsRead();
+
         return redirect()->back();
     }
 }

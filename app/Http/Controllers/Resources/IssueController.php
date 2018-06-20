@@ -14,60 +14,44 @@ use App\Services\Issue\IssueManager;
 class IssueController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @var IssueManager
      */
-    public function index()
-    {
-        return view('entity.issue.index', ['issues' => Issue::orderBy('state')->simplePaginate(15)]);
-    }
+    protected $issueManager;
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * IssueController constructor.
+     * @param IssueManager $issueManager
      */
-    public function create()
+    public function __construct(IssueManager $issueManager)
     {
-        return view('entity.issue.create');
+        $this->issueManager = $issueManager;
     }
 
     /**
      * @param CreateIssueReportRequest $request
      * @param Issue $issue
-     * @param IssueManager $issueManager
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(CreateIssueReportRequest $request, Issue $issue, IssueManager $issueManager)
+    public function store(CreateIssueReportRequest $request, Issue $issue)
     {
-        return redirect(action(
-            'Resources\IssueController@show',
-            $issueManager->create($issue, $request->user(), $request->input())))
+        return
+            redirect()
+            ->route('issues.show', $this->issueManager->create($issue, $request->user(), $request->input()))
             ->with('success', _i('Issue created'));
     }
 
     /**
-     * Display the specified resource.
-     *
      * @param Issue $issue
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Issue $issue)
-    {
-        return view('entity.issue.show', ['issue' => $issue]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Issue $issue
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Issue $issue)
     {
-        $issue->update(['state' => Issue::STATE_FIXED]);
-        return redirect(action('Resources\IssueController@index'))->with('success', _i('Issue updated'));
+        $this->issueManager->update($issue);
+
+        return
+            redirect()
+            ->route('issues.index')
+            ->with('success', _i('Issue updated'));
     }
 
     /**
@@ -77,7 +61,33 @@ class IssueController extends Controller
      */
     public function destroy(Issue $issue)
     {
-        $issue->delete();
-        return redirect(action('Resources\IssueController@index'))->with('success', _i('Issue removed'));
+        $this->issueManager->delete($issue);
+
+        return redirect()->route('issues.index')->with('success', _i('Issue removed'));
+    }
+
+    /**
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function index()
+    {
+        return view('entity.issue.index', ['issues' => Issue::orderBy('state')->simplePaginate(15)]);
+    }
+
+    /**
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function create()
+    {
+        return view('entity.issue.create');
+    }
+
+    /**
+     * @param Issue $issue
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function show(Issue $issue)
+    {
+        return view('entity.issue.show', ['issue' => $issue]);
     }
 }

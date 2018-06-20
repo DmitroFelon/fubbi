@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: user
- * Date: 01.06.18
- * Time: 11:11
- */
 
 namespace App\Services\Inspiration;
 
@@ -19,18 +13,46 @@ class InspirationManager
 {
     /**
      * @param User $user
+     * @return \Illuminate\Database\Eloquent\Model
+     */
+    public function create(User $user)
+    {
+        return $user->inspirations()->create();
+    }
+
+    /**
+     * @param Inspiration $inspiration
+     * @param array $params
+     */
+    public function update(Inspiration $inspiration, array $params)
+    {
+        $inspiration->update($params);
+    }
+
+    /**
+     * @param Inspiration $inspiration
+     * @throws \Exception
+     */
+    public function delete(Inspiration $inspiration)
+    {
+        $inspiration->delete();
+    }
+
+    /**
      * @param $files
      * @param Inspiration $inspiration
-     * @param $id
      * @param $collection
-     * @return mixed
+     * @return \Spatie\MediaLibrary\Media
+     * @throws \Spatie\MediaLibrary\Exceptions\FileCannotBeAdded
+     * @throws \Spatie\MediaLibrary\Exceptions\InvalidConversion
      */
-    public function storeFile(User $user, $files, Inspiration $inspiration, $id, $collection)
+    public function storeFile($files, Inspiration $inspiration, $collection)
     {
         foreach ($files as $file) {
-            $media = $user->inspirations()->findOrFail($id)->addMedia($file)->toMediaCollection($collection);
+            $media = $inspiration->addMedia($file)->toMediaCollection($collection);
         }
         $media->url = $inspiration->prepareMediaConversion($media);
+
         return $media;
     }
 }
