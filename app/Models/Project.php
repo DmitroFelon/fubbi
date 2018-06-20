@@ -23,7 +23,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Log;
 use Kodeine\Metable\Metable;
 use Laravel\Cashier\Subscription;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -162,13 +161,6 @@ class Project extends Model implements HasMediaConversions, Invitable
      * @var array
      */
     protected $with = ['client', 'metas'];
-
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::addGlobalScope(new App\Scopes\ProjectScope());
-    }
 
     /**
      * Project's owner
