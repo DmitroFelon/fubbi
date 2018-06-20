@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Helpers\Page;
 use App\Models\HelpVideo;
 use App\Http\Requests\CreateOrUpdateHelpVideoRequest;
+use App\Services\HelpVideo\HelpVideoManager;
 
 /**
  * Class HelpVideosController
@@ -13,25 +14,11 @@ use App\Http\Requests\CreateOrUpdateHelpVideoRequest;
  */
 class HelpVideosController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        return view('entity.help_video.index', ['videos' => HelpVideo::paginate(20)]);
-    }
+    protected $helpVideoManager;
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    public function __construct(HelpVideoManager $helpVideoManager)
     {
-        $pages = Page::getAvailablePages()->keyBy('route');
-        return view('entity.help_video.create', compact('pages'));
+        $this->helpVideoManager = $helpVideoManager;
     }
 
     /**
@@ -41,32 +28,9 @@ class HelpVideosController extends Controller
      */
     public function store(CreateOrUpdateHelpVideoRequest $request, HelpVideo $helpVideo)
     {
-        $helpVideo->fill($request->except(['_token', '_method']));
-        $helpVideo->save();
+        $this->helpVideoManager->create($helpVideo, $request->except(['_token', '_method']));
+
         return redirect()->action('Resources\HelpVideosController@index')->with('success', _i('Video has been created.'));
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param HelpVideo $helpVideo
-     * @return \Illuminate\Http\Response
-     */
-    public function show(HelpVideo $helpVideo)
-    {
-        return view('entity.help_video.show', compact('helpVideo'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param HelpVideo $helpVideo
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(HelpVideo $helpVideo)
-    {
-        $pages = Page::getAvailablePages()->keyBy('route');
-        return view('entity.help_video.edit', compact('helpVideo', 'pages'));
     }
 
     /**
@@ -76,21 +40,57 @@ class HelpVideosController extends Controller
      */
     public function update(CreateOrUpdateHelpVideoRequest $request, HelpVideo $helpVideo)
     {
-        $helpVideo->fill($request->except(['_token', '_method']));
-        $helpVideo->save();
-        return redirect()->action('Resources\HelpVideosController@index')->with('success', _i('Video has been updated.'));
+        $this->helpVideoManager->update($helpVideo, $request->except(['_token', '_method']));
+
+        return redirect()->route('help_videos.index')->with('success', _i('Video has been updated.'));
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
      * @param HelpVideo $helpVideo
-     * @return \Illuminate\Http\Response
-     * @throws \Exception
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(HelpVideo $helpVideo)
     {
-        $helpVideo->delete();
-        return redirect()->action('Resources\HelpVideosController@index')->with('success', _i('Video has been removed.'));
+        $this->helpVideoManager->delete($helpVideo);
+
+        return redirect()->route('help_videos.index')->with('success', _i('Video has been removed.'));
+    }
+
+    /**
+     * @param HelpVideo $helpVideo
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function edit(HelpVideo $helpVideo)
+    {
+        $pages = Page::getAvailablePages()->keyBy('route');
+
+        return view('entity.help_video.edit', compact('helpVideo', 'pages'));
+    }
+
+    /**
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function index()
+    {
+        return view('entity.help_video.index', ['videos' => HelpVideo::paginate(20)]);
+    }
+
+    /**
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function create()
+    {
+        $pages = Page::getAvailablePages()->keyBy('route');
+
+        return view('entity.help_video.create', compact('pages'));
+    }
+
+    /**
+     * @param HelpVideo $helpVideo
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function show(HelpVideo $helpVideo)
+    {
+        return view('entity.help_video.show', compact('helpVideo'));
     }
 }
