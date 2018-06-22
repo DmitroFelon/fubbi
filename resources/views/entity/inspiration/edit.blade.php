@@ -80,7 +80,7 @@
             dropzones.forEach(function (id) {
                 var collection = $("#" + id).attr('data-collection');
                 var dropzone = new Dropzone("div#" + id, {
-                    url: "/inspirations/{{$inspiration->id}}/storeFile/" + collection,
+                    url: "/files/store/inspiration/{{ $inspiration->id }}/" + collection,
                     paramName: 'files',
                     method: 'POST',
                     uploadMultiple: true,
@@ -95,8 +95,7 @@
 
             function dropzone_init() {
                 var thisDropzone = this;
-                $.get("/inspirations/{{$inspiration->id}}/getFiles/" + thisDropzone.options.collection,
-                        {collection: thisDropzone.options.collection},
+                $.get("/files/get/inspiration/{{ $inspiration->id }}/" + thisDropzone.options.collection,
                         function (data) {
                             data.forEach(function (item) {
                                 thisDropzone.emit("addedfile", item);
@@ -107,18 +106,24 @@
             }
 
             function dropzone_removedfile(item) {
-                $.post({url: '/inspirations/' + item.model_id + '/removeFile/' + item.id, method: "delete"});
+                $.post({url: "/files/delete/inspiration/{{ $inspiration->id }}/" + item.id, method: "delete"});
                 item.previewElement.remove();
             }
 
+            var i = 0;
             function dropzone_success(item, response) {
+                var lenght = response.length;
                 var thisDropzone = this;
-                var response_data = response[0];
+                var response_data = response[i];
                 item.id = response_data.id;
                 item.url = response_data.url;
                 item.model_id = response_data.model_id;
                 item.mime_type = response_data.mime_type;
                 setDropzoneThumbnail(item, thisDropzone);
+                i++;
+                if (i == lenght) {
+                    i = 0;
+                }
             }
 
             function setDropzoneThumbnail(item, thisDropzone) {

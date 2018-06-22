@@ -46,17 +46,18 @@
                     @include('entity.article.partials.google-preview')
                 </div>
 
-                @if($article->hasMedia('copyscape'))
-                    <div class="row">
-                        <h3 class="text-center">
-                            {{_i('Copyscape screenshot')}}
-                        </h3>
-                        <a target="_blank" href="{{$article->getMedia('copyscape')->first()->getFullUrl()}}">
-                            <img class="img-thumbnail" width="250"
-                                 src="{{$article->getMedia('copyscape')->first()->getFullUrl()}}" alt="">
-                        </a>
+                <h3 class="text-center">Copyscape</h3>
+                <div class="row">
+                    <div class="col col-xs-12">
+                        @each(
+                            'entity.project.partials.files-row',
+                            $article->getMedia('copyscape'),
+                            'media', 'entity.project.partials.files-row-empty'
+                        )
                     </div>
-                @endif
+                </div>
+                <hr>
+                <a href="{{ route('form.article.files', ['project' => $project->id, 'article' => $article->id]) }}" class="btn btn-primary">Files</a>
                 @if(is_array($article->getMeta('socialposts')))
                     <div class="row">
                         <div class="row m-t-md">

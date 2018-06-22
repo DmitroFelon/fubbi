@@ -79,57 +79,6 @@ class InspirationController extends Controller
 
     /**
      * @param Request $request
-     * @param Inspiration $inspiration
-     * @param $collection
-     * @return \Illuminate\Http\JsonResponse|null
-     */
-    public function storeFile(Request $request, Inspiration $inspiration, $collection)
-    {
-        if (! $request->hasFile('files')) {
-
-            return null;
-        }
-        try {
-            $response = $this->inspirationManager->storeFile($request->file('files'), $inspiration, $collection);
-        } catch (\Exception $e) {
-
-            return response()->json($e->getMessage(), 500);
-        }
-
-        return response()->json([$response], 200);
-    }
-
-    /**
-     * @param Inspiration $inspiration
-     * @param $collection
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function getFiles(Inspiration $inspiration, $collection)
-    {
-        return response()
-            ->json(
-                $this->inspirationRepository
-                    ->getFiles($inspiration, $collection)
-                    ->filter()
-                    ->toArray(),
-                200
-            );
-    }
-
-    /**
-     * @param Inspiration $inspiration
-     * @param $file_id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function removeFile(Inspiration $inspiration, $file_id)
-    {
-        $inspiration->media()->findOrFail($file_id)->delete();
-
-        return response()->json('success', 200);
-    }
-
-    /**
-     * @param Request $request
      * @param InspirationRepository $inspirationRepository
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */

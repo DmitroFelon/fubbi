@@ -13,12 +13,14 @@ use Ghanem\Rating\Traits\Ratingable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 use Kodeine\Metable\Metable;
 use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
 use Spatie\MediaLibrary\HasMedia\Interfaces\HasMedia;
 use Spatie\Tags\HasTags;
 use Spatie\Tags\Tag;
+use Spatie\MediaLibrary\Media;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\MediaLibrary\HasMedia\Interfaces\HasMediaConversions;
 
 /**
  * App\Models\Article
@@ -82,7 +84,7 @@ use Spatie\Tags\Tag;
  * @property int $cycle_id
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Article whereCycleId($value)
  */
-class Article extends Model implements HasMedia
+class Article extends Model implements HasMedia, HasMediaConversions
 {
     use HasMediaTrait;
     use HasComments;
@@ -90,6 +92,7 @@ class Article extends Model implements HasMedia
     use Metable;
     use HasTags;
     use Ratingable;
+    use LogsActivity;
 
     /**
      * @var array
@@ -125,6 +128,32 @@ class Article extends Model implements HasMedia
     }
 
     /**
+     * @param Media|null $media
+     * @throws \Spatie\Image\Exceptions\InvalidManipulation
+     */
+    public function registerMediaConversions(Media $media = null)
+    {
+        $this->addMediaConversion('dropzone')
+            ->crop('crop-center', 120, 120)->nonQueued();
+    }
+
+    /**
+     * @param Media $media
+     * @return string
+     * @throws \Spatie\MediaLibrary\Exceptions\InvalidConversion
+     */
+    public function prepareMediaConversion(Media $media)
+    {
+        try {
+            return (File::exists($media->getPath('dropzone')))
+                ? $media->getFullUrl('dropzone')
+                : $media->getFullUrl();
+        } catch (\Exception $e) {
+            return $media->getFullUrl();
+        }
+    }
+
+    /**
      * One article may belong to many projects
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -150,6 +179,9 @@ class Article extends Model implements HasMedia
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function cycle()
     {
         return $this->belongsTo(Cycle::class);
@@ -233,6 +265,9 @@ class Article extends Model implements HasMedia
 
     }
 
+    /**
+     * @return bool
+     */
     public function getIsThisMonthAttribute()
     {
         $project = $this->project;
@@ -255,9 +290,9 @@ class Article extends Model implements HasMedia
 
     /**
      * @param string $as
-     * @return \Spatie\MediaLibrary\Media
-     * @throws \Spatie\MediaLibrary\Exceptions\FileCannotBeAdded\FileDoesNotExist
-     * @throws \Spatie\MediaLibrary\Exceptions\FileCannotBeAdded\FileIsTooBig
+     * @param null $api
+     * @return Media|void
+     * @throws \Exception
      */
     public function export($as = Drive::MS_WORD, $api = null)
     {
@@ -350,6 +385,11 @@ class Article extends Model implements HasMedia
         return $title;
     }
 
+    /**
+     * @param $query
+     * @param int $overdue
+     * @param string $compare
+     */
     public function ScopeOverdue($query, $overdue = 1, $compare = '')
     {
         switch ($overdue) {

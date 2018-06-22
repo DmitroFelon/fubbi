@@ -15,7 +15,6 @@ use App\Services\Project\ProjectRepository;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Spatie\MediaLibrary\Media;
 
 /**
  * Class ProjectController
@@ -239,21 +238,6 @@ class ProjectController extends Controller
     }
 
     /**
-     * @param Project $project
-     * @param Request $request
-     * @param ProjectManager $projectManager
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function get_stored_files(Project $project, Request $request, ProjectManager $projectManager)
-    {
-        if (!$request->has('collection')) {
-            return response()->json('error', 400);
-        }
-        $files = $projectManager->storedFiles($project, $request->input());
-        return response()->json($files->filter()->toArray(), 200);
-    }
-
-    /**
      * @param Idea $idea
      * @param IdeaRepository $ideaRepository
      * @return \Illuminate\Http\JsonResponse
@@ -262,17 +246,6 @@ class ProjectController extends Controller
     {
         $files = $ideaRepository->storedFiles($idea);
         return response()->json($files->filter()->toArray(), 200);
-    }
-
-    /**
-     * @param Project $project
-     * @param Media $media
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function remove_stored_files(Project $project, Media $media)
-    {
-        $project->media()->findOrFail($media->id)->delete();
-        return response()->json('success', 200);
     }
 
     /**
@@ -288,22 +261,6 @@ class ProjectController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => true, 'message' => $e->getMessage()], 400);
         }
-    }
-
-    /**
-     * @param Project $project
-     * @param Request $request
-     * @param ProjectManager $projectManager
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function prefill_files(Project $project, Request $request, ProjectManager $projectManager)
-    {
-        try{
-            $projectManager->addFiles($project, $request->file('file'), $request->input('file_type'));
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
-        }
-        return redirect()->back()->with('success', 'Files have been successfully added!');
     }
 
     /**

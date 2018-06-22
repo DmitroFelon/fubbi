@@ -230,6 +230,7 @@ return [
         \App\Providers\GlobalNotificationProvider::class,
 
         \App\Providers\InvitationServiceProvider::class,
+        \App\Providers\FileServiceProvider::class,
     ],
 
     /*

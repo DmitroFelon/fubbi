@@ -37,22 +37,4 @@ class InspirationManager
     {
         $inspiration->delete();
     }
-
-    /**
-     * @param $files
-     * @param Inspiration $inspiration
-     * @param $collection
-     * @return \Spatie\MediaLibrary\Media
-     * @throws \Spatie\MediaLibrary\Exceptions\FileCannotBeAdded
-     * @throws \Spatie\MediaLibrary\Exceptions\InvalidConversion
-     */
-    public function storeFile($files, Inspiration $inspiration, $collection)
-    {
-        foreach ($files as $file) {
-            $media = $inspiration->addMedia($file)->toMediaCollection($collection);
-        }
-        $media->url = $inspiration->prepareMediaConversion($media);
-
-        return $media;
-    }
 }

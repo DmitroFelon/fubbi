@@ -147,6 +147,9 @@ class User extends Authenticatable implements HasMedia
      */
     protected $appends = ['role'];
 
+    /**
+     * @param $password
+     */
     public function setPasswordAttribute($password)
     {
         $this->attributes['password'] = bcrypt($password);

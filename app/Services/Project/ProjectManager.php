@@ -1,18 +1,10 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: user
- * Date: 06.06.18
- * Time: 15:42
- */
 
 namespace App\Services\Project;
 
 use App\Models\Project;
 use App\Models\Team;
 use App\User;
-use Spatie\MediaLibrary\Media;
-use Illuminate\Http\Request;
 
 /**
  * Class ProjectManager
@@ -86,34 +78,6 @@ class ProjectManager
             $data['message']     = _i("%s is not attached to this project" . $e->getMessage(), [$user->name]);
         }
         return $data;
-    }
-
-    /**
-     * @param Project $project
-     * @param array $files
-     * @param $fileType
-     * @throws \Spatie\MediaLibrary\Exceptions\FileCannotBeAdded
-     */
-    public function addFiles(Project $project, array $files, $fileType)
-    {
-        foreach ($files as $file){
-            $project->addMedia($file)->toMediaCollection($fileType);
-        }
-    }
-
-    /**
-     * @param Project $project
-     * @param array $params
-     * @return \Illuminate\Support\Collection
-     */
-    public function storedFiles(Project $project, array $params)
-    {
-        $files = $project->getMedia($params['collection']);
-        $files->transform(function (Media $media) use ($project) {
-            $media->url = $project->prepareMediaConversion($media);
-            return $media;
-        });
-        return $files;
     }
 
     /**

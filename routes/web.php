@@ -137,6 +137,28 @@ Route::middleware(['auth'])->group(function () {
         Route::get('project/{project}/decline', 'InviteController@declineProjectInvite')->name('decline.project.invite');
     });
 
+
+    Route::prefix('files')->group(function () {
+        Route::get('project/{project}', 'FileController@storeProjectFilesForm')->name('form.project.files');
+        Route::get('project/{project}/article/{article}', 'FileController@storeArticleFilesForm')->name('form.article.files');
+        Route::prefix('store')->group(function () {
+            Route::post('article/{article}/{collection}', 'FileController@storeArticleFiles')->name('store.article.files');
+            Route::post('project/{project}/{collection}', 'FileController@storeProjectFiles')->name('store.project.files');
+            Route::post('inspiration/{inspiration}/{collection}', 'FileController@storeInspirationFiles')->name('store.inspiration.files');
+        });
+        Route::prefix('get')->group(function () {
+            Route::get('article/{article}/{collection}', 'FileController@getArticleFiles')->name('get.article.files');
+            Route::get('project/{project}/{collection}', 'FileController@getProjectFiles')->name('get.project.files');
+            Route::get('inspiration/{inspiration}/{collection}', 'FileController@getInspirationFiles')->name('get.inspiration.files');
+        });
+        Route::prefix('delete')->group(function () {
+            Route::delete('article/{article}/{fileId}', 'FileController@deleteArticleFile')->name('delete.article.files');
+            Route::delete('project/{project}/{fileId}', 'FileController@deleteProjectFile')->name('delete.project.files');
+            Route::delete('inspiration/{inspiration}/{fileId}', 'FileController@deleteInspirationFile')->name('delete.inspiration.files');
+        });
+    });
+
+
     Route::namespace('Resources')->group(function () {
 
         Route::prefix('project')->group(
@@ -175,12 +197,6 @@ Route::middleware(['auth'])->group(function () {
 
         Route::prefix('articles')->group(function () {
             Route::get('request_access/{article}', 'ArticlesController@request_access');
-        });
-
-        Route::prefix('inspirations')->group(function () {
-            Route::get('{inspiration}/getFiles/{collection}', 'InspirationController@getFiles');
-            Route::post('{inspiration}/storeFile/{collection}', 'InspirationController@storeFile');
-            Route::delete('{inspiration}/removeFile/{file_id}', 'InspirationController@removeFile');
         });
 
         Route::resources(

@@ -14,8 +14,15 @@ use App\Services\HelpVideo\HelpVideoManager;
  */
 class HelpVideosController extends Controller
 {
+    /**
+     * @var HelpVideoManager
+     */
     protected $helpVideoManager;
 
+    /**
+     * HelpVideosController constructor.
+     * @param HelpVideoManager $helpVideoManager
+     */
     public function __construct(HelpVideoManager $helpVideoManager)
     {
         $this->helpVideoManager = $helpVideoManager;
@@ -48,6 +55,7 @@ class HelpVideosController extends Controller
     /**
      * @param HelpVideo $helpVideo
      * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception
      */
     public function destroy(HelpVideo $helpVideo)
     {
@@ -80,9 +88,7 @@ class HelpVideosController extends Controller
      */
     public function create()
     {
-        $pages = Page::getAvailablePages()->keyBy('route');
-
-        return view('entity.help_video.create', compact('pages'));
+        return view('entity.help_video.create', ['pages' => Page::getAvailablePages()->keyBy('route')]);
     }
 
     /**

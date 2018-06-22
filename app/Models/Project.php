@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-
 use App;
 use App\Facades\ProjectExport;
 use App\Models\Interfaces\Invitable;
@@ -192,13 +191,9 @@ class Project extends Model implements HasMediaConversions, Invitable
     }
 
     /**
-     * Upload user's quiz files
-     * May contain logo, ready content, images etc
-     *
-     *
-     * @param \Illuminate\Http\Request $request
-     * @throws \Spatie\MediaLibrary\Exceptions\FileCannotBeAdded\FileDoesNotExist
-     * @throws \Spatie\MediaLibrary\Exceptions\FileCannotBeAdded\FileIsTooBig
+     * @param Request $request
+     * @return \Illuminate\Support\Collection
+     * @throws \Exception
      */
     public function addFiles(Request $request)
     {
@@ -238,8 +233,7 @@ class Project extends Model implements HasMediaConversions, Invitable
      * @param $file_input
      * @param Request $request
      * @return Media
-     * @throws \Spatie\MediaLibrary\Exceptions\FileCannotBeAdded\FileDoesNotExist
-     * @throws \Spatie\MediaLibrary\Exceptions\FileCannotBeAdded\FileIsTooBig
+     * @throws \Exception
      */
     private function addFile($file_input, Request $request)
     {
@@ -373,6 +367,7 @@ class Project extends Model implements HasMediaConversions, Invitable
     /**
      * @param Media $media
      * @return string
+     * @throws \Spatie\MediaLibrary\Exceptions\InvalidConversion
      */
     public function prepareMediaConversion(Media $media)
     {
@@ -403,9 +398,9 @@ class Project extends Model implements HasMediaConversions, Invitable
         return array_combine($themes, $themes);
     }
 
-
     /**
      * @return string
+     * @throws \Exception
      */
     public function export()
     {

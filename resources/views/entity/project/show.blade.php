@@ -129,9 +129,50 @@
 
         <div class="col col-lg-12 col-xs-12">
             @component('components.ibox')
-            @slot('title') Media files @endslot
-            @slot('hide') @endslot
-            @include('entity.project.partials.show.media')
+                @slot('title') Media files @endslot
+                @slot('hide') @endslot
+                <h3 class="text-center">Ready Content</h3>
+                <div class="row">
+                    <div class="col col-xs-12">
+                        @each(
+                            'entity.project.partials.files-row',
+                            $project->getMedia('ready_content'),
+                            'media', 'entity.project.partials.files-row-empty'
+                        )
+                    </div>
+                </div>
+                <h3 class="text-center">Compliance Guideline</h3>
+                <div class="row">
+                    <div class="col col-xs-12">
+                        @each(
+                            'entity.project.partials.files-row',
+                            $project->getMedia('compliance_guideline'),
+                            'media', 'entity.project.partials.files-row-empty'
+                        )
+                    </div>
+                </div>
+                <h3 class="text-center">Logo</h3>
+                <div class="row">
+                    <div class="col col-xs-12">
+                        @each(
+                            'entity.project.partials.files-row',
+                            $project->getMedia('logo'),
+                            'media', 'entity.project.partials.files-row-empty'
+                        )
+                    </div>
+                </div>
+                <h3 class="text-center">Article Images</h3>
+                <div class="row">
+                    <div class="col col-xs-12">
+                        @each(
+                            'entity.project.partials.files-row',
+                            $project->getMedia('article_images'),
+                            'media', 'entity.project.partials.files-row-empty'
+                        )
+                    </div>
+                </div>
+                <hr>
+                <a href="{{ route('form.project.files', ['project' => $project->id]) }}" class="btn btn-primary">Files</a>
             @endcomponent
         </div> {{-- Media --}}
 
