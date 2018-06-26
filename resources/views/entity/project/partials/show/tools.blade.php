@@ -1,5 +1,5 @@
 @if(!in_array($project->state, [\App\Models\Helpers\ProjectStates::QUIZ_FILLING]))
-    <a style="width:15em;" href="{{action('Resources\ProjectController@export', $project)}}"
+    <a style="width:15em;" href="{{ route('export.project', $project) }}"
        class="btn btn-white yellow-bg btn-xs btn-xs m-r-sm p-w-sm">
         <i class="fa fa-download"></i> {{_i('Download Requirements')}}
     </a>

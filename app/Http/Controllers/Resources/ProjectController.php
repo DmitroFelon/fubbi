@@ -264,22 +264,6 @@ class ProjectController extends Controller
     }
 
     /**
-     * Export all project's data to zip
-     *
-     * @param Project $project
-     * @return mixed
-     */
-    public function export(Project $project)
-    {
-        try {
-            return response()->download($project->export());
-        } catch (\Exception $e) {
-            report($e);
-            return redirect()->back()->with('error', 'Somethig wrong happened while requirements export. Please, try later.');
-        }
-    }
-
-    /**
      * @param Project $project
      * @param Request $request
      * @param ProjectManager $projectManager

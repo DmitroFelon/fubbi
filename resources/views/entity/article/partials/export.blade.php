@@ -3,17 +3,17 @@
     </button>
     <ul class="dropdown-menu">
         <li>
-            <a href="{{action('Resources\ArticlesController@batch_export', ['ids' => $articles->pluck('id')->toArray(), 'as' => \App\Services\Google\Drive::PDF])}}">
+            <a href="{{route('export.articles', ['ids' => $articles->pluck('id')->toArray(), 'as' => \App\Services\Google\Drive::PDF])}}">
                 <i class="fa fa-file-pdf-o"></i> {{_i('PDF')}}
             </a>
         </li>
         <li>
-            <a href="{{action('Resources\ArticlesController@batch_export', ['ids' => $articles->pluck('id')->toArray(), 'as' => \App\Services\Google\Drive::MS_WORD])}}">
+            <a href="{{route('export.articles', ['ids' => $articles->pluck('id')->toArray(), 'as' => \App\Services\Google\Drive::MS_WORD])}}">
                 <i class="fa fa-windows"></i> {{_i('MS Word')}}
             </a>
         </li>
         <li>
-            <a href="{{action('Resources\ArticlesController@batch_export', ['ids' => $articles->pluck('id')->toArray(), 'as' => \App\Services\Google\Drive::TEXT])}}">
+            <a href="{{route('export.articles', ['ids' => $articles->pluck('id')->toArray(), 'as' => \App\Services\Google\Drive::TEXT])}}">
                 <i class="fa fa-file-text-o"></i> {{_i('Plain Text')}}
             </a>
         </li>

@@ -291,8 +291,7 @@ class Article extends Model implements HasMedia, HasMediaConversions
     /**
      * @param string $as
      * @param null $api
-     * @return Media|void
-     * @throws \Exception
+     * @return \Illuminate\Http\RedirectResponse|Media|void
      */
     public function export($as = Drive::MS_WORD, $api = null)
     {
@@ -321,7 +320,8 @@ class Article extends Model implements HasMedia, HasMediaConversions
             return $media;
         } catch (\Exception $e) {
             report($e);
-            throw $e;
+
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 

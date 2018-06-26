@@ -105,16 +105,19 @@ class DashboardController extends Controller
      */
     private function client()
     {
-        return redirect()->action('Resources\InspirationController@index');
-        // $user = Auth::user();
-        //
-        // if ($user->projects()->count() == 1) {
-        //     return redirect()->action('Resources\ProjectController@show', $user->projects()->first());
-        // } elseif ($user->projects()->count() > 1) {
-        //     return redirect()->action('Resources\ProjectController@index');
-        // } else {
-        //     return redirect()->action('Resources\InspirationController@index');
-        // }
+        $user = Auth::user();
+        if ($user->projects()->count() == 1) {
+
+            return redirect()->route('projects.show', $user->projects()->first());
+        }
+        elseif ($user->projects()->count() > 1) {
+
+            return redirect()->route('projects.index');
+        }
+        else {
+
+            return redirect()->route('inspirations.index');
+        }
     }
 
     /**

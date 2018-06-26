@@ -158,6 +158,11 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
+    Route::prefix('export')->group(function () {
+        Route::get('project/{project}', 'FileController@exportProject')->name('export.project');
+        Route::get('article/{article}', 'FileController@exportArticle')->name('export.article');
+        Route::get('articles', 'FileController@exportArticles')->name('export.articles');
+    });
 
     Route::namespace('Resources')->group(function () {
 
@@ -176,7 +181,6 @@ Route::middleware(['auth'])->group(function () {
             Route::post('{project}/prefill_files', 'ProjectController@prefill_files')->name('add.files');
             Route::get('{project}/get_stored_files', 'ProjectController@get_stored_files');
             Route::get('{project}/remove_stored_file/{media}', 'ProjectController@remove_stored_files');
-            Route::get('{project}/export', 'ProjectController@export');
             Route::get('{project}/resume', 'ProjectController@resume');
             Route::post('{project}/invite_users', 'ProjectController@attachUsers');
             Route::post('{project}/invite_team', 'ProjectController@attachTeam');
@@ -191,9 +195,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('user/{user}', 'MessageController@user');
             Route::get('clear', 'MessageController@clear');
         });
-
-        Route::get('articles/batch_export', 'ArticlesController@batch_export');
-        Route::get('articles/{article}/export/', 'ArticlesController@export');
 
         Route::prefix('articles')->group(function () {
             Route::get('request_access/{article}', 'ArticlesController@request_access');

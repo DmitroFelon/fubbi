@@ -46,21 +46,21 @@
             <ul class="dropdown-menu">
                 <li>
                     <a title="Export"
-                       href="{{action('Resources\ArticlesController@export', [$article, 'as' => \App\Services\Google\Drive::PDF])}}"
+                       href="{{ route('export.article', [$article, 'as' => \App\Services\Google\Drive::PDF]) }}"
                        class="">
                         <i class="fa fa-file-pdf-o"></i> {{_i('PDF')}}
                     </a>
                 </li>
                 <li>
                     <a title="Export"
-                       href="{{action('Resources\ArticlesController@export', [$article, 'as' => \App\Services\Google\Drive::MS_WORD])}}"
+                       href="{{ route('export.article', [$article, 'as' => \App\Services\Google\Drive::MS_WORD]) }}"
                        class=" ">
                         <i class="fa fa-windows"></i> {{_i('MS Word')}}
                     </a>
                 </li>
                 <li>
                     <a title="Export"
-                       href="{{action('Resources\ArticlesController@export', [$article, 'as' => \App\Services\Google\Drive::TEXT])}}"
+                       href="{{ route('export.article', [$article, 'as' => \App\Services\Google\Drive::TEXT]) }}"
                        class=" ">
                         <i class="fa fa-file-text-o"></i> {{_i('Plain Text')}}
                     </a>

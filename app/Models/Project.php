@@ -408,12 +408,15 @@ class Project extends Model implements HasMediaConversions, Invitable
             $ready_export = trim($this->getMeta('export'));
             //return path to zip if exist
             if ($ready_export and File::exists(storage_path('app/public/exports/') . $ready_export)) {
+
                 return storage_path('app/public/exports/') . $ready_export;
             }
+
             return ProjectExport::make($this);
         } catch (\Exception $e) {
             report($e);
-            throw new \Exception(_('Somethig wrong happened while project export, please try later: ' . $e->getMessage()));
+
+            throw new \Exception(_('Somethnig wrong happened while project export, please try later: ' . $e->getMessage()));
         }
 
     }

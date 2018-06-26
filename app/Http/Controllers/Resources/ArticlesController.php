@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Resources;
 
 use App\Http\Controllers\Controller;
 use App\Services\Article\ArticleRepository;
-use App\Services\Article\ArticleExport;
 use App\Services\Google\Drive;
 use App\Models\Article;
 use Illuminate\Http\Request;
@@ -16,21 +15,45 @@ use Illuminate\Http\Request;
 class ArticlesController extends Controller
 {
     /**
-     * @param Request $request
+     * @var Drive
+     */
+    protected $drive;
+
+    /**
+     * @var ArticleRepository
+     */
+    protected $articleRepository;
+
+    /**
+     * ArticlesController constructor.
+     * @param Drive $drive
      * @param ArticleRepository $articleRepository
+     */
+    public function __construct(
+        Drive $drive,
+        ArticleRepository $articleRepository
+    )
+    {
+        $this->drive = $drive;
+        $this->articleRepository = $articleRepository;
+    }
+
+    /**
+     * @param Request $request
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function index(Request $request, ArticleRepository $articleRepository)
+    public function index(Request $request)
     {
-        $articles_query = $articleRepository->articlesByRole($request->user());
-        $articles_query = $articleRepository->searchAll($request->input(), $articles_query);
-        $articles = $articles_query->paginate(10);
+        $articlesQuery = $this->articleRepository->articlesByRole($request->user());
+        $articlesQuery = $this->articleRepository->searchAll($request->input(), $articlesQuery);
+        $articles = $articlesQuery->paginate(10);
         $filters['types'] = Article::getAllTypes();
         $filters['statuses'] = [
             ''    => _i('Select status'),
             true  => _i('Accepted'),
             false => _i('Declined')
         ];
+
         return view('entity.article.index', compact('articles', 'filters'));
     }
 
@@ -46,33 +69,12 @@ class ArticlesController extends Controller
     /**
      * @param Request $request
      * @param Article $article
-     * @param Drive $drive
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function request_access(Request $request, Article $article, Drive $drive)
+    public function request_access(Request $request, Article $article)
     {
-        $drive->addPermission($article->google_id, [$request->user()->email => 'commenter']);
+        $this->drive->addPermission($article->google_id, [$request->user()->email => 'commenter']);
+
         return redirect()->back()->with('success', 'Permissions has been provided');
-    }
-
-    /**
-     * @param Article $article
-     * @param Request $request
-     * @param ArticleExport $articleExport
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\RedirectResponse|\Symfony\Component\HttpFoundation\BinaryFileResponse|\Symfony\Component\HttpFoundation\Response
-     */
-    public function export(Article $article, Request $request, ArticleExport $articleExport)
-    {
-        return $articleExport->singleExport($article, $request->only(['as', 'show']));
-    }
-
-    /**
-     * @param Request $request
-     * @param ArticleExport $articleExport
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\RedirectResponse|\Symfony\Component\HttpFoundation\BinaryFileResponse|\Symfony\Component\HttpFoundation\Response
-     */
-    public function batch_export(Request $request, ArticleExport $articleExport)
-    {
-        return $articleExport->batchExport($request->only(['as', 'ids']));
     }
 }

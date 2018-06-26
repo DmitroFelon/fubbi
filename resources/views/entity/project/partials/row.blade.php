@@ -32,7 +32,7 @@
             <a href="{{action('Project\ArticlesController@index', [$project])}}" class="btn btn-white btn-sm blue-bg">
                 <i class="fa fa-folder"></i> {{_i('Content')}}
             </a>
-            <a style="width:15em;" href="{{action('Resources\ProjectController@export', $project)}}"
+            <a style="width:15em;" href="{{ route('export.project', $project) }}"
                class="btn btn-white btn-sm yellow-bg">
                 <i class="fa fa-download"></i> {{_i('Download Requirements')}}
             </a>

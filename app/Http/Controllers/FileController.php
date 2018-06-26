@@ -94,6 +94,37 @@ class FileController extends Controller
     }
 
     /**
+     * @param Article $article
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse|\Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function exportArticle(Article $article, Request $request)
+    {
+        $data = $this->articleFiles->prepareExport($article, $request->input());
+        if ($data['success'] == 1) {
+
+            return response()->download($data['fullPath'], $data['name']);
+        }
+
+        return redirect()->back()->with($data['response']->status, $data['response']->message);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse|\Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function exportArticles(Request $request)
+    {
+        $data = $this->articleFiles->prepareBatchExport($request->input());
+        if ($data['success'] == 1) {
+
+            return response()->download($data['fullPath']);
+        }
+
+        return redirect()->back()->with($data['response']->status, $data['response']->message);
+    }
+
+    /**
      * @param Project $project
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
@@ -140,6 +171,21 @@ class FileController extends Controller
     public function deleteProjectFile(Project $project, string $fileId)
     {
         $this->projectFiles->delete($project, $fileId);
+    }
+
+    /**
+     * @param Project $project
+     * @return \Illuminate\Http\RedirectResponse|\Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function exportProject(Project $project)
+    {
+        $data = $this->projectFiles->export($project);
+        if ($data['success'] == 1) {
+
+            return response()->download($data['readyProject']);
+        }
+
+        return redirect()->back()->with($data['response']->status, $data['response']->message);
     }
 
     /**

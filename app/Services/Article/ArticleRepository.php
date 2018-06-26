@@ -74,5 +74,14 @@ class ArticleRepository
         }
         return $articles_query;
     }
+
+    /**
+     * @param $id
+     * @return Article|Article[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model|null
+     */
+    public function findById($id)
+    {
+        return Article::find($id);
+    }
 }
 
