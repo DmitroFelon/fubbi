@@ -231,6 +231,7 @@ return [
 
         \App\Providers\InvitationServiceProvider::class,
         \App\Providers\FileServiceProvider::class,
+        \App\Providers\ProjectWorkersServiceProvider::class,
     ],
 
     /*

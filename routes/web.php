@@ -164,6 +164,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('articles', 'FileController@exportArticles')->name('export.articles');
     });
 
+    Route::prefix('projects')->group(function () {
+        Route::post('{project}/attach_user', 'ProjectWorkersController@attachWorkers')->name('project.attach.workers');
+        Route::post('{project}/attach_team', 'ProjectWorkersController@attachTeam')->name('project.attach.team');
+        Route::get('{project}/detach_user/{id}', 'ProjectWorkersController@detachWorkers')->name('project.detach.worker');
+        Route::get('{project}/detach_team/{id}', 'ProjectWorkersController@detachTeam')->name('project.detach.team');
+
+    });
+
     Route::namespace('Resources')->group(function () {
 
         Route::prefix('project')->group(
@@ -182,11 +190,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('{project}/get_stored_files', 'ProjectController@get_stored_files');
             Route::get('{project}/remove_stored_file/{media}', 'ProjectController@remove_stored_files');
             Route::get('{project}/resume', 'ProjectController@resume');
-            Route::post('{project}/invite_users', 'ProjectController@attachUsers');
-            Route::post('{project}/invite_team', 'ProjectController@attachTeam');
-
-            Route::get('{project}/remove_from_project/{user}', 'ProjectController@detachUser');
-            Route::get('{project}/remove_team_from_project/{team}', 'ProjectController@detachTeam');
             Route::get('{project}/allow_modifications', 'ProjectController@allow_modifications');
         });
 

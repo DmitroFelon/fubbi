@@ -214,30 +214,6 @@ class ProjectController extends Controller
     }
 
     /**
-     * @param Project $project
-     * @param User $user
-     * @param ProjectManager $projectManager
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function detachUser(Project $project, User $user, ProjectManager $projectManager)
-    {
-        $data = $projectManager->detachUsers($project, $user);
-        return redirect()->back()->with($data['message_key'], $data['message']);
-    }
-
-    /**
-     * @param Project $project
-     * @param Team $team
-     * @param ProjectManager $projectManager
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function detachTeam(Project $project, Team $team, ProjectManager $projectManager)
-    {
-        $data = $projectManager->detachTeam($project, $team);
-        return redirect()->back()->with($data['message_key'], $data['message']);
-    }
-
-    /**
      * @param Idea $idea
      * @param IdeaRepository $ideaRepository
      * @return \Illuminate\Http\JsonResponse
@@ -261,34 +237,6 @@ class ProjectController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => true, 'message' => $e->getMessage()], 400);
         }
-    }
-
-    /**
-     * @param Project $project
-     * @param Request $request
-     * @param ProjectManager $projectManager
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function attachUsers(Project $project, Request $request, ProjectManager $projectManager)
-    {
-        if ($request->has('users')) {
-            return $projectManager->attachUsers($project, $request->input());
-        }
-        return redirect()->back()->with('error', _i('Users were not specified'));
-    }
-
-    /**
-     * @param Project $project
-     * @param Request $request
-     * @param ProjectManager $projectManager
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function attachTeam(Project $project, Request $request, ProjectManager $projectManager)
-    {
-        if ($request->has('team')) {
-            return $projectManager->attachTeam($project, $request->input());
-        }
-        return redirect()->back()->with('error', _i('Team was not specified'));
     }
 
     /**

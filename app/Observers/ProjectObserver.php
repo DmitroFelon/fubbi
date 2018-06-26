@@ -257,7 +257,7 @@ class ProjectObserver
      */
     public function attachTeam(Project $project)
     {
-        $team = Team::find($project->eventData['attachTeam']);
+        $team = Team::where('id', $project->eventData['attachTeam'])->first();
         $conversation = ChatFacade::conversation($project->conversation_id);
 
         $team->users->each(function($user) use($conversation) {
